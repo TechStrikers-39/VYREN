@@ -1,0 +1,66 @@
+# ==============================================================================
+# VYREN Platform — .gitignore
+# Institutional Competency Intelligence Platform (MoSPI / NSSTA)
+# ==============================================================================
+
+# --- Secrets & Environment Variables (CRITICAL) ---
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.env
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# --- Node / Frontend ---
+node_modules/
+dist/
+dist-ssr/
+.vite/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Python / Backend ---
+.venv/
+venv/
+env/
+ENV/
+backend/.venv/
+backend/venv/
+backend/env/
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+parts/
+var/
+sdist/
+
+# --- Logs & System Databases ---
+*.log
+logs/
+*.sqlite
+*.sqlite3
+*.db
+
+# --- OS / IDE Artifacts ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
