@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Smart India Hackathon](https://img.shields.io/badge/SIH-2024%20Finalist-orange.svg)](https://sih.gov.in)
+[![Smart India Hackathon](https://img.shields.io/badge/SIH-2026-orange.svg)](https://sih.gov.in)
 [![Ministry](https://img.shields.io/badge/MoSPI-Government%20of%20India-003366.svg)](https://mospi.gov.in)
 [![Institution](https://img.shields.io/badge/NSSTA-Statistical%20Academy-1B3A6B.svg)](https://nssta.gov.in)
 [![Framework](https://img.shields.io/badge/Mission%20Karmayogi-CBC%20FRAC%20Aligned-16A34A.svg)](https://karmayogibharat.gov.in)
@@ -195,6 +195,6 @@ backend\.venv\Scripts\python.exe scratch\test_api_auth_and_onboarding_pass.py
 
 ## Team TechStrikers-39
 
-Developed with pride for the **Smart India Hackathon (SIH)**.
+Developed with pride for **Smart India Hackathon 2026** (Internal Round Qualified).
 
 *Built for India's Official Statistical System • Ministry of Statistics and Programme Implementation (MoSPI) • NSSTA • Mission Karmayogi*
