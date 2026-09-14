@@ -193,7 +193,7 @@ backend\.venv\Scripts\python.exe scratch\test_api_auth_and_onboarding_pass.py
 
 ---
 
-## Team TechStrikers-39
+## Team TΣCH STRIKΣRS
 
 Developed with pride for **Smart India Hackathon 2026** (Internal Round Qualified).
 
