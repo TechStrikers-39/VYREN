@@ -96,17 +96,14 @@ VYREN measures competency across **4 core domains** comprising **40 structured c
 
 ### Discrete Proficiency Scale (Levels 0–4)
 
-$$\begin{array}{|c|c|l|}
-\hline
-\textbf{Level} & \textbf{Score Range} & \textbf{Proficiency Descriptor} \\
-\hline
-\text{Level 0} & 0\% - 24\% & \text{Foundational / Elementary awareness of definitions and survey structures} \\
-\text{Level 1} & 25\% - 49\% & \text{Working / Procedural execution under supervisory guidance} \\
-\text{Level 2} & 50\% - 69\% & \text{Autonomous / Independent practical application on official statistical datasets} \\
-\text{Level 3} & 70\% - 84\% & \textbf{Proficient (Required Cadre Benchmark)} \text{ — Advanced problem-solving and pipeline design} \\
-\text{Level 4} & 85\% - 100\% & \text{Master / Statistical system design, methodology authoring, and audit leadership} \\
-\hline
-\end{array}$$
+| Level | Score Range | Proficiency Descriptor |
+| :---: | :---: | :--- |
+| **Level 0** | 0% – 24% | Foundational — Elementary awareness of definitions and survey structures |
+| **Level 1** | 25% – 49% | Working — Procedural execution under supervisory guidance |
+| **Level 2** | 50% – 69% | Autonomous — Independent practical application on official statistical datasets |
+| **Level 3** | 70% – 84% | **Proficient (Required Cadre Benchmark)** — Advanced problem-solving and pipeline design |
+| **Level 4** | 85% – 100% | Master — Statistical system design, methodology authoring, and audit leadership |
+
 
 ### Measured Score vs Evidence Confidence
 
@@ -120,17 +117,18 @@ $$\begin{array}{|c|c|l|}
 ```mermaid
 flowchart TD
     subgraph Closed_Loop ["VYREN Continuous Competency Lifecycle"]
-        A["1. PROFILE<br/>Cadre Context & Designation"] --> B["2. MEASURE<br/>17-Item Diagnostic Intake"]
-        B --> C["3. IDENTIFY GAP<br/>Delta vs Required Benchmark (Level 3)"]
-        C --> D["4. RECOMMEND<br/>Prioritized Sunbird iGOT Curricula"]
-        D --> E["5. LEARN<br/>Targeted Module Engagement"]
-        E --> F["6. ASSESS<br/>Vetted Post-Module Evaluation"]
-        F --> G["7. RECALIBRATE<br/>Deterministic Score & Level Update"]
-        G --> H{"8. REPEAT<br/>All Benchmarks Met?"}
+        A["1. PROFILE\nCadre Context and Designation"] --> B["2. MEASURE\n17-Item Diagnostic Intake"]
+        B --> C["3. IDENTIFY GAP\nDelta vs Required Benchmark Level 3"]
+        C --> D["4. RECOMMEND\nPrioritized Sunbird iGOT Curricula"]
+        D --> E["5. LEARN\nTargeted Module Engagement"]
+        E --> F["6. ASSESS\nVetted Post-Module Evaluation"]
+        F --> G["7. RECALIBRATE\nDeterministic Score and Level Update"]
+        G --> H{"8. REPEAT\nAll Benchmarks Met?"}
         H -- "Gaps Remain" --> C
-        H -- "Benchmarks Satisfied" --> I["Advanced Reinforcement & Continuous Readiness"]
+        H -- "Benchmarks Satisfied" --> I["Advanced Reinforcement and Continuous Readiness"]
     end
 ```
+
 
 Competency scores and proficiency levels update strictly from empirical assessment evidence, never from speculative estimates or arbitrary AI guesses.
 
@@ -188,14 +186,14 @@ VYREN interfaces with the **DoPT iGOT Karmayogi Sunbird API** (`https://igotkarm
 
 ```mermaid
 graph TD
-    Client["Browser / Client<br/>React 18 + TypeScript + Vite + Tailwind CSS"]
-    API["API Gateway & Services<br/>FastAPI + Python 3.11 + Uvicorn"]
-    Auth["Security & RBAC<br/>ES256 Asymmetric JWT + Role Gates"]
-    CompEngine["Competency Engine<br/>GapEngine + Scoring Engine (Deterministic)"]
-    Validator["9-Stage QC Gate<br/>Automated MCQ Validation Pipeline"]
-    AI["AI Layer<br/>Google Gemini REST API"]
-    iGOT["iGOT Gateway<br/>Live Sunbird Catalog Provider"]
-    DB[("Database<br/>Supabase PostgreSQL + pgvector")]
+    Client["Browser / Client\nReact 18 + TypeScript + Vite + Tailwind CSS"]
+    API["API Gateway and Services\nFastAPI + Python 3.11 + Uvicorn"]
+    Auth["Security and RBAC\nES256 Asymmetric JWT + Role Gates"]
+    CompEngine["Competency Engine\nGapEngine + Scoring Engine (Deterministic)"]
+    Validator["9-Stage QC Gate\nAutomated MCQ Validation Pipeline"]
+    AI["AI Layer\nGoogle Gemini REST API"]
+    iGOT["iGOT Gateway\nLive Sunbird Catalog Provider"]
+    DB[("Database\nSupabase PostgreSQL + pgvector")]
 
     Client -->|HTTPS / REST| API
     API --> Auth
@@ -206,6 +204,7 @@ graph TD
     API --> DB
     CompEngine --> DB
 ```
+
 
 * **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, OGL WebGL canvas shaders.
 * **Backend:** FastAPI, Python 3.11, Pydantic v2, HTTPX, PyJWT, Python-multipart.
