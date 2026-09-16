@@ -1,8 +1,8 @@
+<div align="center">
+    
 # VYREN
 ### Competency Intelligence Platform
 **Turn Skills Into Intelligence**
-
-<div align="center">
 
 [![Smart India Hackathon](https://img.shields.io/badge/SIH-2026-orange.svg)](https://sih.gov.in)
 [![Ministry](https://img.shields.io/badge/MoSPI-Official%20Statistical%20System-003366.svg)](https://mospi.gov.in)
