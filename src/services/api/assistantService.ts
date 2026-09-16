@@ -17,6 +17,9 @@ export interface AIStatus {
   provider: string;
   model_name: string;
   authenticated: boolean;
+  configured?: boolean;
+  live_test?: string;
+  thinking_config?: string;
   blocker_summary?: string | null;
   blocker_details?: string | null;
   capabilities: string[];
@@ -44,19 +47,20 @@ export const assistantService = {
         text: res.reply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         provider: res.provider,
-        integration_mode: res.integration_mode,
+        integration_mode: res.integration_mode || res.mode,
         model_name: res.model_name,
       };
-    } catch (e) {
-      console.warn('AI Assistant API call error, returning fallback:', e);
+    } catch (e: any) {
+      console.warn('AI Assistant API call error:', e);
+      const errMsg = e?.message || e?.detail?.message || "Gemini AI is currently unavailable. Please verify the AI provider configuration.";
       return {
         id: `msg-${Date.now()}`,
         sender: 'ai',
-        text: `I am analyzing your active competency profile. You currently have an active competency evaluation in progress. How can I assist your statistical inference or data engineering learning path?`,
+        text: typeof errMsg === 'string' ? errMsg : "Gemini AI is currently unavailable. Please verify the AI provider configuration.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        provider: 'VYREN Grounded Local Tutor',
-        integration_mode: 'FALLBACK / LOCAL',
-        model_name: 'vyren-grounded-rules-engine',
+        provider: 'google-gemini',
+        integration_mode: 'AI_PROVIDER_UNAVAILABLE',
+        model_name: 'gemini-3.8-flash',
       };
     }
   },

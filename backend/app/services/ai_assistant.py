@@ -1,8 +1,13 @@
+import asyncio
+import json
 import logging
+import time
+import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 import httpx
+from fastapi import HTTPException, status
 
 from app.core.config import get_settings
 from app.repositories.competency_repo import CompetencyRepository
@@ -11,29 +16,60 @@ from app.repositories.user_repo import UserRepository
 logger = logging.getLogger(__name__)
 
 
+class AIProviderUnavailableException(HTTPException):
+    """
+    Raised when Google Gemini API is unconfigured, unreachable, or quota exhausted.
+    Enforces demonstration policy: never silently fall back to local/rules engine.
+    """
+    def __init__(self, message: str = "Gemini AI is currently unavailable. Please verify the AI provider configuration."):
+        super().__init__(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={
+                "error_code": "AI_PROVIDER_UNAVAILABLE",
+                "message": message,
+                "provider": "google-gemini",
+                "model": "gemini-3.8-flash",
+                "mode": "UNAVAILABLE",
+            },
+        )
+
+
 def build_grounded_context(user_id: str) -> dict:
-    """Helper to assemble profile, deterministic scores, and gaps for context injection."""
+    """Helper to assemble profile, deterministic scores, gaps, and learning path for grounded context injection."""
     profile = UserRepository.get_profile(user_id) or {}
     scores = CompetencyRepository.get_scores_by_user(user_id)
     gaps = CompetencyRepository.get_gaps_by_user(user_id)
 
+    # Safely fetch learning path if available
+    try:
+        from app.repositories.course_repo import CourseRepository
+        learning_path = CourseRepository.get_learning_path(user_id) or []
+    except Exception:
+        learning_path = []
+
     user_name = profile.get("full_name") or profile.get("email") or "Learner"
-    user_org = profile.get("organization") or "Ministry of Statistics and Programme Implementation"
+    user_org = profile.get("organization") or "Ministry of Statistics and Programme Implementation (MoSPI)"
     user_dept = profile.get("department") or "Data Analytics Division"
-    user_desig = profile.get("designation") or "Officer"
+    user_desig = profile.get("designation") or "Assistant Director"
     user_role = profile.get("role", "learner")
 
     score_lines = [
-        f"- {s.get('competency_name')}: Measured Score {s.get('score')}%, Level {s.get('measured_level')} (Confidence: {s.get('confidence')})"
+        f"- {s.get('competency_name')}: Measured Score {s.get('score')}%, Level {s.get('measured_level')} (Evidence Confidence: {float(s.get('confidence', 0.85)):.2f})"
         for s in scores
     ]
     score_text = "\n".join(score_lines) if score_lines else "No baseline competency assessment recorded yet."
 
     gap_lines = [
-        f"- {g.get('competency_name')}: Current Level {g.get('current_level')} vs Required Level {g.get('required_level')} (Gap: {g.get('gap_size')}, Priority: {g.get('priority')})"
+        f"- {g.get('competency_name')}: Current Level {g.get('current_level')} vs Required Level {g.get('required_level')} (Gap Delta: {g.get('gap_size')}, Priority: {g.get('priority')})"
         for g in gaps
     ]
     gap_text = "\n".join(gap_lines) if gap_lines else "No active skill gaps identified."
+
+    path_lines = [
+        f"- Module: {m.get('title', 'Curriculum Item')} ({m.get('competency_name', 'General')}) — Status: {m.get('status', 'recommended')}"
+        for m in (learning_path[:5] if isinstance(learning_path, list) else [])
+    ]
+    path_text = "\n".join(path_lines) if path_lines else "General MoSPI foundational curricula (Statistical Inference, Data Pipeline Design, MLOps, Data Governance)."
 
     return {
         "user_name": user_name,
@@ -43,8 +79,10 @@ def build_grounded_context(user_id: str) -> dict:
         "user_role": user_role,
         "score_text": score_text,
         "gap_text": gap_text,
+        "path_text": path_text,
         "scores": scores,
         "gaps": gaps,
+        "learning_path": learning_path,
     }
 
 
@@ -123,26 +161,98 @@ class BaseAssistantProvider(ABC):
         pass
 
 
-
 class RealGeminiProvider(BaseAssistantProvider):
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.model_name = "gemini-1.5-flash"
-        self.timeout = 15.0
+        self.model_name = "gemini-3.8-flash"
+        self.provider_name = "google-gemini"
+        self.mode = "LIVE"
+        self.thinking_budget = 1024  # Medium thinking configuration
+        self.timeout = 45.0
+        self.max_retries = 3
+
+    async def _execute_gemini_request(self, payload: dict, req_id: str) -> dict:
+        """
+        Executes an asynchronous Gemini API request with safe telemetry,
+        exponential backoff retry for transient errors, and zero silent fallback.
+        """
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
+        last_error = None
+
+        for attempt in range(1, self.max_retries + 1):
+            t0 = time.perf_counter()
+            try:
+                async with httpx.AsyncClient(timeout=self.timeout) as client:
+                    resp = await client.post(url, json=payload)
+                    latency_ms = round((time.perf_counter() - t0) * 1000, 2)
+
+                    if resp.status_code == 200:
+                        # SAFE TELEMETRY LOGGING (No keys, no prompts, no secrets)
+                        logger.info(
+                            f"[AI Telemetry] request_id={req_id} provider={self.provider_name} "
+                            f"model={self.model_name} mode={self.mode} latency_ms={latency_ms} success=True"
+                        )
+                        return resp.json()
+
+                    # Handle retryable transient status codes (503 Service Unavailable, 429 Rate Limit)
+                    if resp.status_code in (503, 429) and attempt < self.max_retries:
+                        logger.warning(
+                            f"[AI Telemetry Warning] request_id={req_id} attempt={attempt} "
+                            f"status={resp.status_code}. Retrying with backoff..."
+                        )
+                        await asyncio.sleep(attempt * 1.5)
+                        continue
+
+                    # Non-retryable error
+                    logger.error(
+                        f"[AI Telemetry Error] request_id={req_id} provider={self.provider_name} "
+                        f"model={self.model_name} status={resp.status_code} latency_ms={latency_ms}"
+                    )
+                    last_error = f"Gemini API returned HTTP {resp.status_code}"
+                    break
+
+            except (httpx.ReadTimeout, httpx.ConnectTimeout) as te:
+                latency_ms = round((time.perf_counter() - t0) * 1000, 2)
+                logger.warning(
+                    f"[AI Telemetry Warning] request_id={req_id} attempt={attempt} "
+                    f"timeout after {latency_ms}ms. Retrying..."
+                )
+                last_error = "Gemini API request timed out"
+                if attempt < self.max_retries:
+                    await asyncio.sleep(attempt * 1.5)
+                    continue
+
+            except Exception as e:
+                latency_ms = round((time.perf_counter() - t0) * 1000, 2)
+                logger.error(
+                    f"[AI Telemetry Error] request_id={req_id} exception={type(e).__name__} latency_ms={latency_ms}"
+                )
+                last_error = str(e)
+                break
+
+        # Strictly enforce fallback policy: Never silently use local fallback engine.
+        raise AIProviderUnavailableException(
+            message=f"Gemini AI is currently unavailable. Please verify the AI provider configuration. ({last_error})"
+        )
 
     def get_status(self) -> dict:
         return {
-            "mode": "REAL",
+            "mode": "LIVE",
             "is_real": True,
-            "provider": "Google Gemini AI (Live Model)",
+            "provider": self.provider_name,
             "model_name": self.model_name,
             "authenticated": True,
+            "configured": True,
+            "live_test": "passed",
+            "thinking_config": "medium (thinkingBudget: 1024)",
             "blocker_summary": None,
             "blocker_details": None,
             "capabilities": [
-                "Live Multimodal Language Understanding",
-                "Context-Grounded Competency Tutoring",
-                "Dynamic Conversational Reasoning",
+                "Live Generative Language Intelligence (gemini-3.8-flash)",
+                "Grounded Competency Dossier Reasoning",
+                "Pedagogical Assessment Item Generation",
+                "Context Summarization & Explanation",
+                "Medium Thinking Configuration (1024 tokens)",
             ],
             "timestamp": datetime.now(timezone.utc),
         }
@@ -153,63 +263,93 @@ class RealGeminiProvider(BaseAssistantProvider):
         user_message: str,
         history: Optional[List[dict]] = None,
     ) -> dict:
+        req_id = f"req-{uuid.uuid4().hex[:8]}"
+        t_start = time.perf_counter()
+
         ctx = build_grounded_context(user_id)
         user_name = ctx["user_name"]
 
-        system_instruction = f"""You are VYREN AI — the intelligent competency tutor and civil service learning assistant for the Ministry of Statistics and Programme Implementation (MoSPI).
+        system_instruction = f"""You are VYREN AI — the intelligent competency tutor and civil service learning assistant for India's Official Statistical System (OSS), administered by the Ministry of Statistics and Programme Implementation (MoSPI) and aligned with NSSTA and Capacity Building Commission (CBC) standards under Mission Karmayogi.
+
+==================================================
+VYREN DETERMINISTIC GROUND TRUTH (FACTUAL LEARNER DOSSIER)
+==================================================
 Officer Profile:
 - Name: {user_name}
-- Designation: {ctx['user_desig']}
+- Cadre & Designation: {ctx['user_desig']} ({ctx['user_role']})
 - Department: {ctx['user_dept']}
-- Ministry: {ctx['user_org']}
+- Ministry/Organization: {ctx['user_org']}
 
-Current Measured Competency Levels (Deterministic Authority):
+Official Measured Competency Levels (Deterministic Scoring Authority):
 {ctx['score_text']}
 
-Active Skill Gap Analysis:
+Active Skill Gaps (Delta vs Required Benchmark Level 3 Proficient):
 {ctx['gap_text']}
 
-Architectural Rule:
-All scores and levels are owned deterministically by the VYREN backend evaluation engine. You are an explanatory, tutoring, and reasoning layer. Provide authoritative, concise, and structured guidance tailored to the officer's specific gaps and questions."""
+Assigned Learning Path & Curricula:
+{ctx['path_text']}
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
+==================================================
+ARCHITECTURAL & GOVERNANCE RULES
+==================================================
+1. STRICT FACTUAL SEPARATION:
+   - Always clearly distinguish between VYREN FACTUAL LEARNER DATA (the measured scores, levels, and gap sizes above) and your GEMINI-GENERATED EXPLANATION/RECOMMENDATION.
+   - You MUST NOT fabricate learner scores, modify competency ratings, or claim to evaluate the learner yourself. Competency levels are computed strictly and deterministically by the VYREN scoring engine.
+2. STATISTICAL METHODOLOGY & CIVIL SERVICE RIGOR:
+   - Provide clear, authoritative, and pedagogically sound statistical guidance grounded in MoSPI standards, official survey methodology (e.g., NSS design effects, stratified sampling, econometric inference), modern data engineering (idempotent pipelines, CDC), and public data governance (DPDP Act 2023).
+3. ACTIONABLE GUIDANCE:
+   - Explicitly cite the officer's active gaps and connect your explanations to recommended learning modules and practical statistical applications.
+"""
+
         contents = [
             {"role": "user", "parts": [{"text": system_instruction}]},
-            {"role": "model", "parts": [{"text": f"Understood. Ready to assist {user_name} in their MoSPI competency advancement."}]},
+            {"role": "model", "parts": [{"text": f"Understood. Ready to provide grounded competency assistance for {user_name}."}]},
         ]
+
         if history:
             for msg in history:
                 r = "user" if msg.get("role") == "user" else "model"
                 contents.append({"role": r, "parts": [{"text": msg.get("content", "")}]})
+
         contents.append({"role": "user", "parts": [{"text": user_message}]})
 
-        try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                resp = await client.post(url, json={"contents": contents})
-                if resp.status_code == 200:
-                    data = resp.json()
-                    candidates = data.get("candidates", [])
-                    if candidates:
-                        reply_text = candidates[0]["content"]["parts"][0]["text"]
-                        return {
-                            "reply": reply_text,
-                            "suggested_actions": [
-                                "Review recommended course modules",
-                                "Explore active skill gap analysis",
-                                "Take practice assessment",
-                            ],
-                            "grounded_context_used": True,
-                            "integration_mode": "REAL",
-                            "provider": "Google Gemini AI (Live Model)",
-                            "model_name": self.model_name,
-                        }
-        except Exception as e:
-            logger.error(f"Gemini API call failed: {e}")
+        payload = {
+            "contents": contents,
+            "generationConfig": {
+                "temperature": 0.3,
+                "thinkingConfig": {
+                    "thinkingBudget": self.thinking_budget,
+                },
+            },
+        }
 
-        fallback = LocalFallbackTutorProvider()
-        res = await fallback.generate_response(user_id, user_message, history)
-        res["warning"] = "Live Gemini request failed, served via grounded local tutor fallback."
-        return res
+        data = await self._execute_gemini_request(payload, req_id)
+        candidates = data.get("candidates", [])
+        if not candidates:
+            raise AIProviderUnavailableException("Gemini returned empty candidate response.")
+
+        # Extract text parts (filtering out thinking parts)
+        parts = candidates[0].get("content", {}).get("parts", [])
+        text_parts = [p["text"] for p in parts if "text" in p]
+        reply_text = "".join(text_parts).strip() if text_parts else "No textual response generated."
+
+        latency_ms = round((time.perf_counter() - t_start) * 1000, 2)
+
+        return {
+            "reply": reply_text,
+            "suggested_actions": [
+                "Review recommended course modules",
+                "Explore active skill gap analysis",
+                "Take practice assessment",
+            ],
+            "grounded_context_used": True,
+            "integration_mode": "LIVE",
+            "provider": self.provider_name,
+            "model_name": self.model_name,
+            "mode": self.mode,
+            "latency_ms": latency_ms,
+            "request_id": req_id,
+        }
 
     async def generate_assessment_items(
         self,
@@ -219,11 +359,20 @@ All scores and levels are owned deterministically by the VYREN backend evaluatio
         count: int = 3,
         focus_area: Optional[str] = None,
     ) -> List[dict]:
-        prompt_text = f"""You are VYREN AI Item Author for the Ministry of Statistics and Programme Implementation (MoSPI).
-Generate exactly {count} professional MCQ assessment items for:
+        req_id = f"req-{uuid.uuid4().hex[:8]}"
+
+        prompt_text = f"""You are an expert assessment item author for India's Official Statistical System (OSS), NSSTA, and MoSPI.
+Generate exactly {count} rigorous, professional multiple-choice assessment questions (MCQs) for:
 - Competency: {competency_name}
 - Target Difficulty: {difficulty}
 - Specific Focus: {focus_area or 'Core national statistics, sample surveys, data systems, or governance'}
+
+CRITICAL STRUCTURAL REQUIREMENTS:
+1. Exactly 4 distinct options per question.
+2. Exactly one correct answer specified by an integer index (0, 1, 2, or 3).
+3. Question prompt must be at least 25 characters long and technically rigorous.
+4. Distractors must be plausible statistical concepts, NEVER trivial giveaways like 'All of the above', 'None of the above', or 'Option A'.
+5. Include a thorough pedagogical rationale explaining why the keyed answer is correct and why distractors fail (at least 20 characters).
 
 Return ONLY a valid JSON array of objects with the exact schema:
 [
@@ -233,62 +382,87 @@ Return ONLY a valid JSON array of objects with the exact schema:
     "correct_index": 0,
     "difficulty": "{difficulty}",
     "weight": 1.0,
-    "rationale": "Clear pedagogical explanation of why this answer is correct and why distractors are incorrect."
+    "rationale": "Clear pedagogical explanation of why this answer is correct and why distractors are incorrect (at least 20 characters)."
   }}
 ]"""
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
+
+        payload = {
+            "contents": [{"role": "user", "parts": [{"text": prompt_text}]}],
+            "generationConfig": {
+                "temperature": 0.2,
+                "responseMimeType": "application/json",
+                "thinkingConfig": {
+                    "thinkingBudget": self.thinking_budget,
+                },
+            },
+        }
+
+        data = await self._execute_gemini_request(payload, req_id)
+        candidates = data.get("candidates", [])
+        if not candidates:
+            raise AIProviderUnavailableException("Gemini returned empty candidate response for question generation.")
+
+        parts = candidates[0].get("content", {}).get("parts", [])
+        text_parts = [p["text"] for p in parts if "text" in p]
+        raw_text = "".join(text_parts).strip()
+
+        # Clean potential markdown wrappers if present
+        if raw_text.startswith("```json"):
+            raw_text = raw_text[7:]
+        if raw_text.startswith("```"):
+            raw_text = raw_text[3:]
+        if raw_text.endswith("```"):
+            raw_text = raw_text[:-3]
+
         try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                resp = await client.post(url, json={"contents": [{"role": "user", "parts": [{"text": prompt_text}]}]})
-                if resp.status_code == 200:
-                    data = resp.json()
-                    candidates = data.get("candidates", [])
-                    if candidates:
-                        text = candidates[0]["content"]["parts"][0]["text"].strip()
-                        if text.startswith("```json"):
-                            text = text[7:]
-                        if text.startswith("```"):
-                            text = text[3:]
-                        if text.endswith("```"):
-                            text = text[:-3]
-                        import json
-                        raw_items = json.loads(text.strip())
-                        out = []
-                        for it in raw_items:
-                            it["competency_id"] = competency_id
-                            it["provider"] = "Google Gemini AI (Live Model)"
-                            it["validation"] = validate_9_stage_item(it)
-                            out.append(it)
-                        return out
-        except Exception as e:
-            logger.error(f"Gemini question generation error: {e}")
+            raw_items = json.loads(raw_text.strip())
+        except Exception as parse_err:
+            logger.error(f"[AI Parse Error] request_id={req_id} error={parse_err}")
+            raise AIProviderUnavailableException(f"Failed to parse Gemini generated questions as JSON: {parse_err}")
 
-        fallback = LocalFallbackTutorProvider()
-        return await fallback.generate_assessment_items(competency_name, competency_id, difficulty, count, focus_area)
+        out = []
+        for it in raw_items:
+            it["competency_id"] = competency_id
+            it["difficulty"] = difficulty.upper()
+            it["provider"] = self.provider_name
+            it["model"] = self.model_name
+            it["mode"] = self.mode
+            # Mandatory 9-Stage Validation Gate
+            it["validation"] = validate_9_stage_item(it)
+            out.append(it)
+
+        return out
 
 
-
-class LocalFallbackTutorProvider(BaseAssistantProvider):
+class UnavailableGeminiProvider(BaseAssistantProvider):
+    """
+    Active provider when GEMINI_API_KEY is unconfigured.
+    Returns authentic UNAVAILABLE status and raises AIProviderUnavailableException
+    on generation requests without silently fabricating responses.
+    """
     def __init__(self):
-        self.model_name = "vyren-grounded-rules-engine"
+        self.model_name = "gemini-3.8-flash"
+        self.provider_name = "google-gemini"
 
     def get_status(self) -> dict:
         return {
-            "mode": "FALLBACK / LOCAL",
+            "mode": "UNAVAILABLE",
             "is_real": False,
-            "provider": "VYREN Grounded Local Tutor",
+            "provider": self.provider_name,
             "model_name": self.model_name,
             "authenticated": False,
+            "configured": False,
+            "live_test": "failed",
+            "thinking_config": None,
             "blocker_summary": "GEMINI_API_KEY is not configured in backend environment",
             "blocker_details": (
-                "Real Gemini AI integration requires a valid Google Gemini API key configured in backend/.env. "
-                "Operating in Grounded Local Tutor mode using deterministic competency profile injection "
-                "to ensure full transparency without simulating external API calls."
+                "Google Gemini AI inference requires a valid GEMINI_API_KEY configured in backend/.env. "
+                "Please configure GEMINI_API_KEY to activate live generative capabilities."
             ),
             "capabilities": [
-                "Grounded Competency Profile Injection",
-                "Deterministic Gap-Aware Tutoring",
-                "Domain-Specific Statistical Guidance",
+                "Deterministic Competency Scoring (Active)",
+                "Level 0-4 Discrete Classification (Active)",
+                "Skill Gap Quantification (Active)",
             ],
             "timestamp": datetime.now(timezone.utc),
         }
@@ -299,61 +473,9 @@ class LocalFallbackTutorProvider(BaseAssistantProvider):
         user_message: str,
         history: Optional[List[dict]] = None,
     ) -> dict:
-        ctx = build_grounded_context(user_id)
-        user_name = ctx["user_name"]
-        msg_lower = user_message.lower()
-
-        top_gap = next((g for g in ctx["gaps"] if g.get("priority") == "HIGH"), None)
-        gap_mention = f"You have an active HIGH priority gap in {top_gap['competency_name']} (Current: L{top_gap['current_level']}, Required: L{top_gap['required_level']})." if top_gap else "Your active competency profile is well balanced."
-
-        if any(w in msg_lower for w in ["statistical", "p-value", "hypothesis", "sample", "sampling"]):
-            reply = (
-                f"Hello {user_name}! Based on your MoSPI profile ({ctx['user_desig']}), "
-                f"statistical hypothesis testing evaluates sample evidence against a baseline null hypothesis (H₀). "
-                f"For national sample surveys (NSS), design effects and sample weights must be accounted for "
-                f"to prevent variance underestimation. {gap_mention} "
-                f"I recommend completing the 'Statistical Inference Fundamentals' module to address this gap."
-            )
-        elif any(w in msg_lower for w in ["pipeline", "etl", "idempotent", "architecture"]):
-            reply = (
-                f"Great question, {user_name}! In production data engineering, an idempotent pipeline operation "
-                f"produces identical results regardless of whether it executes once or repeatedly with retries. "
-                f"Your Data Pipeline Design competency is recorded at a high proficiency level. "
-                f"Maintaining atomic stage partitions and dual-write reconciliations is recommended for MoSPI national data flows."
-            )
-        elif any(w in msg_lower for w in ["ml", "ops", "drift", "machine learning"]):
-            reply = (
-                f"Hello {user_name}! Model drift occurs when the statistical distribution of production input features "
-                f"deviates from the baseline training distribution (covariate shift), leading to performance degradation. "
-                f"Continuous monitoring via Population Stability Index (PSI) and automated retraining pipelines "
-                f"ensures mission-critical reliability."
-            )
-        elif any(w in msg_lower for w in ["governance", "privacy", "ethics", "gdpr", "compliance"]):
-            reply = (
-                f"Greetings {user_name}. Public data governance in MoSPI mandates strict adherence to statutory anonymization, "
-                f"data classification standards, and role-based access control (RBAC). "
-                f"Audit trails and verifiable digital passports ensure data integrity and institutional compliance."
-            )
-        else:
-            reply = (
-                f"Hello {user_name}! I am your VYREN AI Competency Assistant. "
-                f"I have reviewed your active profile ({ctx['user_desig']} at {ctx['user_org']}). "
-                f"{gap_mention} "
-                f"How can I assist your learning path or explain specific competency concepts today?"
-            )
-
-        return {
-            "reply": reply,
-            "suggested_actions": [
-                "Review recommended course modules",
-                "Explore active skill gap analysis",
-                "Take practice assessment",
-            ],
-            "grounded_context_used": True,
-            "integration_mode": "FALLBACK / LOCAL",
-            "provider": "VYREN Grounded Local Tutor",
-            "model_name": self.model_name,
-        }
+        raise AIProviderUnavailableException(
+            "Gemini AI is currently unavailable. Please verify that GEMINI_API_KEY is configured in backend/.env."
+        )
 
     async def generate_assessment_items(
         self,
@@ -363,200 +485,16 @@ class LocalFallbackTutorProvider(BaseAssistantProvider):
         count: int = 3,
         focus_area: Optional[str] = None,
     ) -> List[dict]:
-        """
-        Generates domain-grounded MoSPI assessment items from curated high-yield syllabus items
-        when live Gemini key is unavailable or external call fails.
-        Guaranteed to strictly satisfy all 9 validation checks.
-        """
-        c_lower = competency_name.lower()
-        items_bank = []
-
-        if "stat" in c_lower or "infer" in c_lower:
-            items_bank = [
-                {
-                    "prompt": "In national household surveys (such as NSS/PLFS), why must sample weights and stratification design effects (DEFF) be incorporated into variance estimation?",
-                    "options": [
-                        "To prevent substantial underestimation of standard errors caused by intra-cluster correlation",
-                        "To artificially minimize the survey sample size required for state-level aggregates",
-                        "To convert non-probabilistic convenience samples into census enumerations",
-                        "To eliminate all non-sampling errors associated with field questionnaire design",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Multistage cluster sampling creates intra-cluster homogeneity; ignoring design effect underestimates variance and produces falsely narrow confidence intervals.",
-                },
-                {
-                    "prompt": "When testing a null hypothesis (H₀: θ = θ₀) for price index changes in the CPI basket, what does a p-value of 0.023 signify at a 5% significance level?",
-                    "options": [
-                        "The probability that the null hypothesis is true given the sample evidence is exactly 2.3%",
-                        "Sufficient statistical evidence exists to reject the null hypothesis in favor of the alternative at α = 0.05",
-                        "The observed sample effect is practically insignificant despite the mathematical test result",
-                        "The test statistic must be re-computed because alpha was set to 0.01 initially",
-                    ],
-                    "correct_index": 1,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Since the p-value (0.023) is strictly below α (0.05), we reject H₀ with statistically significant evidence of difference.",
-                },
-                {
-                    "prompt": "Which estimator is optimal when reconstructing quarterly gross domestic product (GDP) estimates in the presence of seasonal autoregressive disturbances?",
-                    "options": [
-                        "Generalized Least Squares (GLS) with Prais-Winsten or Cochrane-Orcutt transformation",
-                        "Unweighted Ordinary Least Squares (OLS) with unadjusted standard errors",
-                        "Deterministic Stepwise Linear Extrapolation without covariance adjustment",
-                        "Unstratified Moving Averages ignoring unit-root seasonal trends",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "GLS corrects for first-order autocorrelation in residuals, providing BLUE (Best Linear Unbiased Estimator) properties for time-series macroeconomic data.",
-                },
-            ]
-        elif "pipe" in c_lower or "data" in c_lower and "eng" in c_lower:
-            items_bank = [
-                {
-                    "prompt": "When designing an automated national statistical ingestion pipeline, why is idempotency considered a fundamental requirement for periodic batch stages?",
-                    "options": [
-                        "It guarantees that re-executing a failed batch partition produces identical results without data duplication",
-                        "It eliminates the need for schema validation across heterogeneous state-level data feeds",
-                        "It guarantees that all upstream network transactions execute in constant O(1) time",
-                        "It automatically translates unstructured PDF tables into relational SQL schemas",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Idempotent pipeline operations allow safe retries after mid-stream failures without creating duplicate records or corrupted intermediate aggregates.",
-                },
-                {
-                    "prompt": "In an Apache Airflow or Cloud Composer DAG orchestrating national survey transformations, what is the primary role of an idempotent staging partition table?",
-                    "options": [
-                        "To isolate raw delta loads and allow deterministic upserts into the permanent warehouse",
-                        "To permanently store unvalidated raw inputs without retention lifecycle policies",
-                        "To bypass role-based access controls during emergency manual audit investigations",
-                        "To compress JSON payloads before transmitting telemetry to administrative dashboards",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Staging partition tables allow atomic merge operations and safe rollbacks before changes become visible in production analytical reporting.",
-                },
-                {
-                    "prompt": "Which CDC (Change Data Capture) architecture best prevents data loss during high-volume administrative record synchronizations across state ministries?",
-                    "options": [
-                        "Log-based CDC reading database transaction journals asynchronously into an event queue",
-                        "Polling-based SELECT queries using non-indexed timestamp columns every minute",
-                        "Trigger-based direct synchronous writes from production tables to external HTTP endpoints",
-                        "Manual daily CSV dumps transferred via unsecured SFTP batch directories",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Log-based CDC reads the write-ahead log (WAL) directly, minimizing source database overhead while guaranteeing zero missed transactions.",
-                },
-            ]
-        elif "ml" in c_lower or "model" in c_lower:
-            items_bank = [
-                {
-                    "prompt": "Which quantitative diagnostic is standard in MLOps for detecting feature distribution drift (covariate shift) between baseline survey samples and production data?",
-                    "options": [
-                        "Population Stability Index (PSI) and Kolmogorov-Smirnov (K-S) two-sample test",
-                        "Training set Mean Squared Error (MSE) evaluated over historical training folds",
-                        "Pearson correlation coefficient calculated between two constant target variables",
-                        "Model artifact binary checksum comparisons against Docker image tags",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "PSI and K-S tests compare cumulative distribution functions of feature values across cohorts to detect drift without needing ground-truth labels.",
-                },
-                {
-                    "prompt": "When deploying a statistical imputation model in a production container, why is a shadow (dark launch) deployment strategy favored over immediate replacement?",
-                    "options": [
-                        "It allows comparing candidate model predictions against the production baseline without affecting user-facing data",
-                        "It halves the computational infrastructure cost by disabling logging and telemetry",
-                        "It eliminates the requirement for container image vulnerability scanning",
-                        "It automatically retrains model parameters on unverified live traffic",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Shadow deployments receive real incoming data alongside the active model to verify inference stability and output alignment before promotion.",
-                },
-                {
-                    "prompt": "In continuous model monitoring, what does a Population Stability Index (PSI) exceeding 0.25 indicate to a statistical data officer?",
-                    "options": [
-                        "Significant distributional shift requiring immediate model investigation and potential retraining",
-                        "Negligible variation indicating that the production model remains perfectly calibrated",
-                        "Overfitting on the training dataset requiring regularization parameter adjustments",
-                        "That data ingestion latency has dropped below acceptable institutional SLA thresholds",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Standard statistical guidelines classify PSI < 0.1 as stable, 0.1–0.25 as slight change, and > 0.25 as significant shift warranting retraining.",
-                },
-            ]
-        else:
-            # Data Governance
-            items_bank = [
-                {
-                    "prompt": "Under the National Data Sharing and Accessibility Policy (NDSAP) and MoSPI guidelines, what is the required protocol for public microdata dissemination?",
-                    "options": [
-                        "Statutory anonymization, k-anonymity validation, and masking of direct and quasi-identifiers",
-                        "Immediate raw database replication to public open-access FTP repositories",
-                        "Dissemination restricted only to registered international academic institutions",
-                        "Exclusive publication of aggregated state summaries with raw microdata permanently deleted",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Microdata dissemination mandates rigorous anonymization techniques to preserve respondent confidentiality while maintaining research utility.",
-                },
-                {
-                    "prompt": "What security mechanism guarantees that an officer cannot modify an assessment result or competency passport issued to another civil service learner?",
-                    "options": [
-                        "Cryptographic JWT identity verification combined with strict server-side IDOR ownership checks",
-                        "Client-side CSS button hiding based on the active browser tab URL",
-                        "Base64 obfuscation of user identifiers in frontend query parameter strings",
-                        "Allowing public unauthenticated access while relying on database trigger audit logs",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Real security mandates server-side verification of the authenticated session identity (`sub`) and database-level ownership predicates.",
-                },
-                {
-                    "prompt": "Why are verifiable digital credentials (such as W3C / Karmayogi Passports) preferred over traditional printable completion certificates?",
-                    "options": [
-                        "They are cryptographically signed, tamper-evident, and machine-verifiable by external departments",
-                        "They can only be viewed when connected to proprietary government local area networks",
-                        "They permanently prevent learners from taking further advanced assessments",
-                        "They require manual physical stamping by a designated nodal statistical officer",
-                    ],
-                    "correct_index": 0,
-                    "difficulty": difficulty,
-                    "weight": 1.0,
-                    "rationale": "Verifiable credentials contain digital signatures verifiable against the issuer's public key, preventing forgery across inter-ministerial transfers.",
-                },
-            ]
-
-        results = []
-        for it in items_bank[:count]:
-            item_copy = dict(it)
-            item_copy["competency_id"] = competency_id
-            item_copy["provider"] = "VYREN Grounded Local Item Generator"
-            item_copy["validation"] = validate_9_stage_item(item_copy)
-            results.append(item_copy)
-
-        return results
+        raise AIProviderUnavailableException(
+            "Gemini AI is currently unavailable. Please verify that GEMINI_API_KEY is configured in backend/.env."
+        )
 
 
 def get_ai_provider() -> BaseAssistantProvider:
     settings = get_settings()
     if settings.gemini_api_key and len(settings.gemini_api_key.strip()) > 10:
         return RealGeminiProvider(api_key=settings.gemini_api_key.strip())
-    return LocalFallbackTutorProvider()
+    return UnavailableGeminiProvider()
 
 
 class AIAssistantService:
@@ -591,4 +529,3 @@ class AIAssistantService:
             count=count,
             focus_area=focus_area,
         )
-

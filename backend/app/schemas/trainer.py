@@ -65,6 +65,8 @@ class GeneratedItem(BaseModel):
     competency_id: str
     validation: GeneratedItemValidation
     provider: str
+    model: Optional[str] = "gemini-3.8-flash"
+    mode: Optional[str] = "LIVE"
 
 
 class LearnerCohortItem(BaseModel):

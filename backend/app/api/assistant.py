@@ -17,8 +17,8 @@ async def get_ai_status(
 ):
     """
     Returns authentic AI engine status:
-    - REAL (if valid GEMINI_API_KEY is configured in backend environment)
-    - FALLBACK / LOCAL (if key is missing, reporting exact blocker reasons)
+    - LIVE (if valid GEMINI_API_KEY is configured in backend environment with gemini-3.8-flash)
+    - UNAVAILABLE (if key is missing or unconfigured, reporting exact blocker reasons)
     """
     status_data = AIAssistantService.get_status()
     return AIStatusResponse(**status_data)

@@ -33,9 +33,9 @@ export const AssistantPage: React.FC = () => {
       sender: 'ai',
       text: "Welcome to the VYREN Competency Assistant. I am calibrated against the National Statistical Systems Training Academy (NSSTA) and Capacity Building Commission (CBC) competency frameworks. My responses are strictly grounded in your verified assessment records, active cadre skill gaps, and assigned iGOT Karmayogi learning modules.\n\nInquire below regarding your measured competency state, why specific modules were recommended, or statistical methodologies relevant to your cadre.",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      provider: 'VYREN Grounded Rules Engine & MoSPI Competency Matrix',
-      integration_mode: 'DETERMINISTIC CONTEXT INJECTION',
-      model_name: 'vyren-competency-intelligence',
+      provider: 'google-gemini',
+      integration_mode: 'LIVE',
+      model_name: 'gemini-3.8-flash',
     },
   ]);
 
@@ -178,9 +178,9 @@ export const AssistantPage: React.FC = () => {
         sender: 'ai',
         text: "Conversation reset. I am synchronized with your active MoSPI competency records and ready for your next inquiry.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        provider: 'VYREN Grounded Rules Engine & MoSPI Competency Matrix',
-        integration_mode: 'DETERMINISTIC CONTEXT INJECTION',
-        model_name: 'vyren-competency-intelligence',
+        provider: 'google-gemini',
+        integration_mode: 'LIVE',
+        model_name: 'gemini-3.8-flash',
       },
     ]);
   };

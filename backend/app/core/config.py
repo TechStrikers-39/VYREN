@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:3000"
     environment: str = "development"
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": (".env", "backend/.env"), "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 @lru_cache()
