@@ -70,7 +70,7 @@ export const WhyVyrenSection: React.FC = () => {
                 "Here is your exact deficit, why it matters, and how to fix it."
               </h3>
               <p className="text-sm text-text-secondary mb-6 leading-relaxed">
-                Objective psychometric telemetry isolates discrete skill gaps, dispatching targeted micro-interventions that adapt in real time.
+                Objective assessment telemetry isolates discrete skill gaps, dispatching targeted micro-interventions that adapt in real time.
               </p>
               <div className="space-y-3.5">
                 <div className="p-3.5 rounded-xl bg-surface-alt border border-border">

@@ -10,8 +10,8 @@ export const TrainerLayout: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <TopNavHeader
           roleBadge="Trainer / Assessor"
-          roleBadgeColor="bg-blue-500/10 text-blue-700 border-blue-500/20"
-          subTitle="Authoring & Cohort Analytics Studio"
+          roleBadgeColor="bg-action-blue/10 text-action-blue border-action-blue/20"
+          subTitle="Assessment Studio"
         />
         <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
           <Outlet />
