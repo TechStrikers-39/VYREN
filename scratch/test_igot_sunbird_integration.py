@@ -114,7 +114,7 @@ class TestSunbirdIgotIntegration(unittest.TestCase):
         self.assertIn("c1000000-0000-0000-0000-000000000001", normalized["competencies_covered"])
         self.assertEqual(
             normalized["external_url"],
-            "https://igotkarmayogi.gov.in/app/toc/do_113840294924828672111/overview",
+            "https://portal.igotkarmayogi.gov.in/public/toc/do_113840294924828672111/overview",
         )
 
     # -------------------------------------------------------------------------

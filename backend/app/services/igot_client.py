@@ -263,7 +263,7 @@ class RealIgotProvider(BaseIgotProvider):
             "duration_minutes": duration_minutes,
             "competencies_covered": competency_ids,
             "competency_names": competency_names,
-            "external_url": f"https://igotkarmayogi.gov.in/app/toc/{do_id}/overview",
+            "external_url": f"https://portal.igotkarmayogi.gov.in/public/toc/{do_id}/overview",
             "integration_mode": "REAL / SUNBIRD",
             "is_active": True,
             "modules": [],

@@ -198,7 +198,7 @@ async def get_google_auth_url():
     Returns the official Supabase OAuth authorization URL for Google authentication.
     Uses implicit flow so access_token is returned directly in the hash fragment.
     """
-    redirect_url = f"{settings.frontend_url}/auth/callback"
+    redirect_url = f"{settings.primary_frontend_url}/auth/callback"
     url = f"{settings.supabase_url}/auth/v1/authorize?provider=google&redirect_to={redirect_url}"
     return {"url": url}
 

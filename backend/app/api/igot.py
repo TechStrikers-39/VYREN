@@ -78,7 +78,15 @@ async def get_igot_courses(
     Explicitly tags courses with provider name and integration mode.
     """
     courses = IGOTClientService.get_courses(competency_area=competency_area)
-    return [IgotCourseItem(**c) for c in courses]
+    return [
+        IgotCourseItem(
+            **{
+                **c,
+                "do_id": c.get("external_id") or c.get("do_id"),
+            }
+        )
+        for c in courses
+    ]
 
 
 @router.get(
@@ -96,6 +104,7 @@ async def search_igot_courses(
     results = IGOTClientService.search_courses(query=query)
     items = []
     for c in results:
+        ext_id = c.get("external_id") or c.get("do_id")
         items.append({
             "id": c["id"],
             "title": c["title"],
@@ -104,7 +113,8 @@ async def search_igot_courses(
             "duration": f"{c.get('duration_minutes', 60)} mins",
             "integration_mode": c.get("integration_mode", "FALLBACK / LOCAL"),
             "external_url": c.get("external_url"),
-            "external_id": c.get("external_id"),
+            "external_id": ext_id,
+            "do_id": ext_id,
         })
     return [IgotCourseItem(**i) for i in items]
 

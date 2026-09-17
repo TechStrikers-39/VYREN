@@ -62,6 +62,7 @@ class IgotCourseItem(BaseModel):
     integration_mode: str = "FALLBACK / LOCAL"
     external_url: Optional[str] = None
     external_id: Optional[str] = None
+    do_id: Optional[str] = None
 
 
 class NormalizedCourseModule(BaseModel):

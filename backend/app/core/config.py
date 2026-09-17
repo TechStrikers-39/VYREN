@@ -21,6 +21,15 @@ class Settings(BaseSettings):
 
     model_config = {"env_file": (".env", "backend/.env"), "env_file_encoding": "utf-8", "extra": "ignore"}
 
+    @property
+    def cors_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.frontend_url.split(",") if origin.strip()]
+
+    @property
+    def primary_frontend_url(self) -> str:
+        origins = self.cors_origins
+        return origins[0] if origins else "http://localhost:3000"
+
 
 @lru_cache()
 def get_settings() -> Settings:

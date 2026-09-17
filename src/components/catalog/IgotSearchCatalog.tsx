@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { igotService, IgotCourse, IgotStatus } from '@/services/api/igotService';
+import { igotService, IgotCourse, IgotStatus, getIgotCourseUrl } from '@/services/api/igotService';
 import { Search, ExternalLink, BookOpen, Clock, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
 
 const QUICK_SUGGESTIONS = [
@@ -139,13 +139,12 @@ export const IgotSearchCatalog: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {courses.map((c) => {
-            const externalUrl =
-              c.external_url ||
-              (c.do_id ? `https://igotkarmayogi.gov.in/app/toc/${c.do_id}/overview` : 'https://igotkarmayogi.gov.in');
+            const doId = (c.do_id || c.external_id || '').match(/(do_[0-9]+)/i)?.[1] || (c.do_id || c.external_id);
+            const externalUrl = getIgotCourseUrl(c);
 
             return (
               <div
-                key={c.id || c.do_id}
+                key={c.id || doId || c.title}
                 className="rounded-2xl border border-border bg-surface p-5 shadow-sm hover:border-primary-navy/50 hover:shadow-md transition flex flex-col justify-between space-y-4"
               >
                 <div className="space-y-2.5">
@@ -153,9 +152,9 @@ export const IgotSearchCatalog: React.FC = () => {
                     <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-primary-navy/10 text-primary-navy border border-primary-navy/20 uppercase truncate max-w-[170px]">
                       {c.provider || 'iGOT Karmayogi'}
                     </span>
-                    {c.do_id && (
+                    {doId && (
                       <span className="text-[10px] font-mono text-text-secondary/70 bg-surface-alt px-1.5 py-0.5 rounded border border-border shrink-0">
-                        {c.do_id.substring(0, 12)}...
+                        {doId.substring(0, 12)}...
                       </span>
                     )}
                   </div>
