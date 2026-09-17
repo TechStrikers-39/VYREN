@@ -12,6 +12,7 @@ const vertexShader = `#version 300 es\nin vec2 position;\nvoid main() {\n  gl_Po
 
 const fragmentShader = `#version 300 es\nprecision highp float;
 uniform vec2 iResolution;
+uniform vec2 uOriginOffset;
 uniform float iTime;
 uniform vec2 uSkew;
 uniform float uTilt;
@@ -39,7 +40,7 @@ float smoother01(float a, float b, float x){
 
 void main() {
     vec2 fragCoord = gl_FragCoord.xy;
-    vec2 p = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
+    vec2 p = (2.0 * fragCoord - iResolution.xy) / iResolution.y - uOriginOffset;
 
     vec3 ro = vec3(0.0);
     vec3 rd = normalize(vec3(p, 2.0));
@@ -205,6 +206,7 @@ export interface GridScanProps {
   scanDuration?: number;
   scanDelay?: number;
   lightMode?: boolean;
+  originOffset?: [number, number];
   className?: string;
   style?: React.CSSProperties;
 }
@@ -218,6 +220,7 @@ export const GridScan: React.FC<GridScanProps> = ({
   scanDuration = 4.5,
   scanDelay = 2.5,
   lightMode = true,
+  originOffset = [0, 0],
   className = '',
   style,
 }) => {
@@ -247,8 +250,13 @@ export const GridScan: React.FC<GridScanProps> = ({
 
     const geometry = new Triangle(gl);
 
+    const initialWidth = container.clientWidth || window.innerWidth;
+    const initialHeight = container.clientHeight || window.innerHeight;
+    renderer.setSize(initialWidth, initialHeight);
+
     const uniforms = {
-      iResolution: { value: [container.clientWidth, container.clientHeight] },
+      iResolution: { value: [gl.drawingBufferWidth, gl.drawingBufferHeight] },
+      uOriginOffset: { value: originOffset },
       iTime: { value: 0 },
       uSkew: { value: [0, 0] },
       uTilt: { value: 0 },
@@ -285,13 +293,23 @@ export const GridScan: React.FC<GridScanProps> = ({
 
     const handleResize = () => {
       if (!container || !renderer) return;
-      const width = container.clientWidth;
-      const height = container.clientHeight;
+      const width = container.clientWidth || window.innerWidth;
+      const height = container.clientHeight || window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      renderer.dpr = dpr;
       renderer.setSize(width, height);
-      uniforms.iResolution.value = [width, height];
+      uniforms.iResolution.value = [gl.drawingBufferWidth, gl.drawingBufferHeight];
     };
 
     handleResize();
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(container);
+    }
     window.addEventListener('resize', handleResize);
 
     const render = (time: number) => {
@@ -309,11 +327,12 @@ export const GridScan: React.FC<GridScanProps> = ({
     return () => {
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
+      if (resizeObserver) resizeObserver.disconnect();
       if (renderer && gl.canvas.parentElement === container) {
         container.removeChild(gl.canvas);
       }
     };
-  }, [linesColor, scanColor, scanOpacity, gridScale, lineThickness, scanDuration, scanDelay, lightMode]);
+  }, [linesColor, scanColor, scanOpacity, gridScale, lineThickness, scanDuration, scanDelay, lightMode, originOffset]);
 
   return <div ref={containerRef} className={`gridscan ${className}`} style={style} />;
 };

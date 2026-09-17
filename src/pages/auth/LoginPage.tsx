@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/i18n';
 import { ROUTES } from '@/constants/routes';
 import VyrenLogo from '@/components/brand/VyrenLogo';
+import GridScan from '@/components/ui/GridScan';
 import { Shield, GraduationCap, BarChart3, AlertCircle, Info, Lock, ArrowRight } from 'lucide-react';
 
 type PersonaType = 'learner' | 'trainer' | 'admin';
@@ -97,8 +98,23 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-surface-alt flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto w-full space-y-6">
+    <div className="min-h-[calc(100vh-4rem)] bg-surface-alt flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background Technical GridScan Layer */}
+      <GridScan
+        linesColor="#1B3A6B"
+        scanColor="#2563EB"
+        scanOpacity={0.19}
+        gridScale={0.15}
+        lineThickness={1.0}
+        scanDuration={5.5}
+        scanDelay={2.0}
+        lightMode={true}
+      />
+
+      {/* Central Radial Vignette Mask: Keeps authentication form area quiet while letting outer perspective grid shine through */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_50%,rgba(248,250,252,0.85)_25%,rgba(248,250,252,0.35)_60%,transparent_100%)] z-0" />
+
+      <div className="max-w-md mx-auto w-full space-y-6 relative z-10">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center space-y-3">
           <div className="mb-1">

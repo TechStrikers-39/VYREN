@@ -3,11 +3,39 @@
 @tailwind utilities;
 
 @layer base {
+  *, ::before, ::after {
+    font-family: 'Inter', sans-serif !important;
+  }
+
   html, body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+
+  button, input, optgroup, select, textarea {
+    font-family: 'Inter', sans-serif !important;
+  }
+
+  ::placeholder {
+    font-family: 'Inter', sans-serif !important;
+  }
+
+  code, kbd, samp, pre {
+    font-family: 'Inter', sans-serif !important;
+  }
+
+  /* Intentional icon font protection */
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+  }
+}
+
+/* Ensure any .font-mono or .font-sans utility classes also strictly enforce Inter */
+.font-mono, .font-sans {
+  font-family: 'Inter', sans-serif !important;
 }
 
 ::-webkit-scrollbar {

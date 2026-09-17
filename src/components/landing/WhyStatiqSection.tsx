@@ -78,19 +78,19 @@ export const WhyVyrenSection: React.FC = () => {
               <div className="space-y-3.5">
                 <div className="p-3.5 rounded-xl bg-surface-alt border border-border">
                   <div className="text-[10px] font-mono text-critical-red font-bold uppercase mb-0.5">01 // PRECISE COMPETENCY GAP</div>
-                  <div className="text-sm font-semibold text-text-primary">-1.40 Level Deficit in Stratified Sampling Variance</div>
+                  <div className="text-sm font-semibold text-text-primary">Discrete Competency Deficit in Stratified Sampling Variance</div>
                 </div>
                 <div className="p-3.5 rounded-xl bg-surface-alt border border-border">
                   <div className="text-[10px] font-mono text-primary-navy font-bold uppercase mb-0.5">02 // ROLE BENCHMARK RATIONALE</div>
-                  <div className="text-sm font-semibold text-text-primary">Cadre Benchmark mandates L4.00 for primary field operations</div>
+                  <div className="text-sm font-semibold text-text-primary">Cadre Benchmark mandates Level 4 proficiency for field operations</div>
                 </div>
                 <div className="p-3.5 rounded-xl bg-surface-alt border border-border">
                   <div className="text-[10px] font-mono text-action-blue font-bold uppercase mb-0.5">03 // TARGETED INTERVENTION</div>
-                  <div className="text-sm font-semibold text-text-primary">STAT-MOD-301: 45-minute focused unit resolving variance mechanics</div>
+                  <div className="text-sm font-semibold text-text-primary">Targeted Micro-Unit: 45-minute focused session resolving variance mechanics</div>
                 </div>
                 <div className="p-3.5 rounded-xl bg-surface-alt border border-border">
                   <div className="text-[10px] font-mono text-success-green font-bold uppercase mb-0.5">04 // VERIFIED PROOF OF MASTERY</div>
-                  <div className="text-sm font-semibold text-text-primary">Empirical score recalibration (+0.80) upon interactive pass</div>
+                  <div className="text-sm font-semibold text-text-primary">Empirical competency recalibration upon verified evaluation pass</div>
                 </div>
               </div>
             </div>

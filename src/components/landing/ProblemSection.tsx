@@ -32,9 +32,14 @@ export const ProblemSection: React.FC = () => {
               <p className="text-xs text-text-secondary mb-4 leading-relaxed">
                 Objective competency baseline derived from diagnostic item-response evaluation.
               </p>
-              <div className="mt-auto pt-3 border-t border-border flex items-baseline justify-between">
-                <span className="font-mono text-2xl font-bold text-text-primary">2.60</span>
-                <span className="font-mono text-[11px] text-warning-amber font-semibold">{t('levels.2.title', {}, 'Developing')}</span>
+              <div className="mt-auto pt-3 border-t border-border flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
+                  <span className="material-symbols-outlined text-[16px] text-text-secondary shrink-0">speed</span>
+                  <span>Current Proficiency</span>
+                </div>
+                <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-surface-alt border border-border text-warning-amber font-semibold shrink-0">
+                  {t('levels.2.title', {}, 'Developing')}
+                </span>
               </div>
             </div>
 
@@ -48,9 +53,14 @@ export const ProblemSection: React.FC = () => {
               <p className="text-xs text-text-secondary mb-4 leading-relaxed">
                 Authoritative capability threshold required for official cadre designation.
               </p>
-              <div className="mt-auto pt-3 border-t border-border flex items-baseline justify-between">
-                <span className="font-mono text-2xl font-bold text-primary-navy">4.00</span>
-                <span className="font-mono text-[11px] text-primary-navy font-semibold">{t('levels.3.title', {}, 'Cadre Target')}</span>
+              <div className="mt-auto pt-3 border-t border-border flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
+                  <span className="material-symbols-outlined text-[16px] text-primary-navy shrink-0">track_changes</span>
+                  <span>Target Proficiency</span>
+                </div>
+                <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-surface-alt border border-border text-primary-navy font-semibold shrink-0">
+                  {t('levels.3.title', {}, 'Cadre Target')}
+                </span>
               </div>
             </div>
 
@@ -64,9 +74,14 @@ export const ProblemSection: React.FC = () => {
               <p className="text-xs text-text-secondary mb-4 leading-relaxed">
                 Mathematical gap isolated specifically in Multi-Stage Stratified Sampling.
               </p>
-              <div className="mt-auto pt-3 border-t border-border flex items-baseline justify-between">
-                <span className="font-mono text-2xl font-bold text-critical-red">-1.40</span>
-                <span className="font-mono text-[11px] text-critical-red font-semibold">{t('priority.high', {}, 'Isolated Gap')}</span>
+              <div className="mt-auto pt-3 border-t border-border flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
+                  <span className="material-symbols-outlined text-[16px] text-critical-red shrink-0">trending_down</span>
+                  <span>Gap to Target</span>
+                </div>
+                <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-critical-surface border border-critical-border text-critical-red font-semibold shrink-0">
+                  {t('priority.high', {}, 'High')}
+                </span>
               </div>
             </div>
 
@@ -80,9 +95,14 @@ export const ProblemSection: React.FC = () => {
               <p className="text-xs text-text-secondary mb-4 leading-relaxed">
                 Targeted micro-syllabus synthesized specifically to remediate the isolated deficit.
               </p>
-              <div className="mt-auto pt-3 border-t border-border flex items-baseline justify-between">
-                <span className="font-mono text-base font-bold text-action-blue">STAT-MOD-301</span>
-                <span className="font-mono text-[11px] text-success-green font-semibold">0 Waste</span>
+              <div className="mt-auto pt-3 border-t border-border flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
+                  <span className="material-symbols-outlined text-[16px] text-action-blue shrink-0">auto_fix_high</span>
+                  <span>Targeted Learning</span>
+                </div>
+                <span className="font-mono text-[11px] px-2 py-0.5 rounded bg-surface-container-low border border-border text-success-green font-semibold shrink-0">
+                  No Waste
+                </span>
               </div>
             </div>
           </div>
