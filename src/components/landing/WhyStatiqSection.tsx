@@ -1,18 +1,21 @@
 import React from 'react';
+import { useTranslation } from '@/i18n';
 
 export const WhyVyrenSection: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="w-full bg-surface py-20 lg:py-28 border-b border-border" id="why-vyren">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="max-w-2xl mb-14">
           <span className="font-mono text-xs uppercase text-action-blue font-bold tracking-wider">
-            [ARCHITECTURAL CONTRAST]
+            [{t('landing.whyBadge')}]
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight mt-2 mb-3">
-            VYREN doesn't just recommend courses.
+            {t('landing.whyTitle')}
           </h2>
           <p className="text-base sm:text-lg text-text-secondary leading-relaxed">
-            Traditional enterprise training acts as a passive library. VYREN operates as an active competency engine.
+            {t('landing.whySubtitle')}
           </p>
         </div>
 

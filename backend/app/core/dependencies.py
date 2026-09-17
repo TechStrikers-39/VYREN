@@ -24,20 +24,17 @@ async def get_current_user(
             detail="Invalid token payload — missing user ID.",
         )
 
-    supabase = get_supabase()
-    result = (
-        supabase.table("profiles")
-        .select("*")
-        .eq("id", user_id)
-        .execute()
-    )
+    from app.repositories.user_repo import UserRepository
 
-    if not result.data:
+    profile = UserRepository.get_profile(user_id)
+
+    if not profile:
         # Auto-provision profile for OAuth users
         user_email = payload.get("email") or ""
         user_meta = payload.get("user_metadata") or {}
         full_name = user_meta.get("full_name") or user_meta.get("name") or (user_email.split("@")[0] if user_email else "User")
         role = user_meta.get("role") or "learner"
+        supabase = get_supabase()
         try:
             supabase.table("profiles").upsert({
                 "id": user_id,
@@ -45,9 +42,9 @@ async def get_current_user(
                 "full_name": full_name,
                 "role": role,
             }, on_conflict="id").execute()
-            created_profile = supabase.table("profiles").select("*").eq("id", user_id).execute()
-            if created_profile.data:
-                return created_profile.data[0]
+            profile = UserRepository.get_profile(user_id)
+            if profile:
+                return profile
         except Exception:
             pass
 
@@ -56,7 +53,7 @@ async def get_current_user(
             detail="User profile not found.",
         )
 
-    return result.data[0]
+    return profile
 
 
 def require_role(*roles: str):

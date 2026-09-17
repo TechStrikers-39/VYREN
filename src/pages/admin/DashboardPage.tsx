@@ -8,6 +8,7 @@ import {
   TrainingEffectivenessResponse
 } from '@/services/api/adminService';
 import { igotService, IgotStatus } from '@/services/api/igotService';
+import { useTranslation } from '@/i18n';
 import { ROUTES } from '@/constants/routes';
 import {
   Users,
@@ -37,6 +38,7 @@ import {
 } from 'lucide-react';
 
 export const AdminDashboardPage: React.FC = () => {
+  const { t } = useTranslation();
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [training, setTraining] = useState<TrainingEffectivenessResponse | null>(null);
@@ -236,11 +238,10 @@ export const AdminDashboardPage: React.FC = () => {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-navy">
-            Enterprise Workforce Competency Governance
+            {t('admin.dashboardTitle')}
           </h1>
           <p className="text-sm text-text-secondary mt-1 max-w-3xl">
-            Organization-wide capability diagnostics, systemic gap concentration, active training coverage,
-            and longitudinal evaluation of civil service competencies.
+            {t('admin.dashboardSubtitle')}
           </p>
         </div>
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { trainerService, GeneratedItem } from '@/services/api/trainerService';
+import { useTranslation } from '@/i18n';
 import {
   ShieldCheck,
   CheckCircle2,
@@ -42,6 +43,7 @@ export const NINE_VALIDATION_STAGES = [
 ] as const;
 
 export const TrainerStudioPage: React.FC = () => {
+  const { t, locale } = useTranslation();
   const [activeTab, setActiveTab] = useState<'authoring' | 'bank' | 'frameworks' | 'manual'>('authoring');
   const [items, setItems] = useState<any[]>([]);
   const [assessments, setAssessments] = useState<any[]>([]);
@@ -117,6 +119,7 @@ export const TrainerStudioPage: React.FC = () => {
         difficulty: aiDifficulty as any,
         count: aiCount,
         focus_area: aiFocusArea,
+        locale: locale,
       });
       setAiGeneratedItems(results);
       setStatusMessage(`Successfully drafted and validated ${results.length} candidate questions via 9-stage pipeline.`);
@@ -260,10 +263,10 @@ export const TrainerStudioPage: React.FC = () => {
             <span>ASSESSMENT AUTHORING &bull; QUALITY GOVERNANCE</span>
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-text-primary">
-            Trainer Authoring Studio
+            {t('trainer.studioTitle')}
           </h1>
           <p className="text-xs text-text-secondary leading-relaxed">
-            AI-assisted assessment authoring with mandatory 9-stage pedagogical validation and human governance.
+            {t('trainer.studioSubtitle')}
           </p>
         </div>
 

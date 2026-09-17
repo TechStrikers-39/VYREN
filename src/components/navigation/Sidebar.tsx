@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
 import VyrenLogo from '../brand/VyrenLogo';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/i18n';
 import {
   LayoutDashboard,
   Map,
@@ -24,6 +25,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
   const { logout } = useAuth();
+  const { t } = useTranslation();
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-150 ${
@@ -44,7 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
         <div className="px-2 pt-1">
           <VyrenLogo size="sm" />
           <div className="mt-2 text-[10px] font-mono tracking-wider text-text-secondary/70 uppercase">
-            Competency Intelligence Platform
+            {t('navigation.platformSubtitle', {}, 'Competency Intelligence Platform')}
           </div>
         </div>
 
@@ -56,7 +58,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <LayoutDashboard className={getIconClass(isActive)} />
-                    <span>Dashboard</span>
+                    <span>{t('navigation.dashboard', {}, 'Dashboard')}</span>
                   </>
                 )}
               </NavLink>
@@ -64,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <Map className={getIconClass(isActive)} />
-                    <span>Learning Path</span>
+                    <span>{t('navigation.learningPath', {}, 'Learning Path')}</span>
                   </>
                 )}
               </NavLink>
@@ -72,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <Bot className={getIconClass(isActive)} />
-                    <span>AI Assistant</span>
+                    <span>{t('navigation.assistant', {}, 'AI Assistant')}</span>
                   </>
                 )}
               </NavLink>
@@ -80,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <User className={getIconClass(isActive)} />
-                    <span>Official Profile</span>
+                    <span>{t('navigation.profile', {}, 'Official Profile')}</span>
                   </>
                 )}
               </NavLink>
@@ -93,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <PenTool className={getIconClass(isActive)} />
-                    <span>Question Studio</span>
+                    <span>{t('navigation.questionStudio', {}, 'Question Studio')}</span>
                   </>
                 )}
               </NavLink>
@@ -101,7 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <TrendingUp className={getIconClass(isActive)} />
-                    <span>Cohort Analytics</span>
+                    <span>{t('navigation.cohortAnalytics', {}, 'Cohort Analytics')}</span>
                   </>
                 )}
               </NavLink>
@@ -114,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <ShieldCheck className={getIconClass(isActive)} />
-                    <span>System Overview</span>
+                    <span>{t('navigation.systemOverview', {}, 'System Overview')}</span>
                   </>
                 )}
               </NavLink>
@@ -122,7 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <BookOpen className={getIconClass(isActive)} />
-                    <span>Training Programs</span>
+                    <span>{t('navigation.trainingPrograms', {}, 'Training Programs')}</span>
                   </>
                 )}
               </NavLink>
@@ -130,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <Users className={getIconClass(isActive)} />
-                    <span>Learner Directory</span>
+                    <span>{t('navigation.learnerDirectory', {}, 'Learner Directory')}</span>
                   </>
                 )}
               </NavLink>
@@ -138,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
                 {({ isActive }) => (
                   <>
                     <Settings className={getIconClass(isActive)} />
-                    <span>System Settings</span>
+                    <span>{t('navigation.systemSettings', {}, 'System Settings')}</span>
                   </>
                 )}
               </NavLink>
@@ -152,10 +154,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
         <div className="px-2 py-2 rounded-xl bg-surface-alt/70 border border-border/80 text-[11px] space-y-1">
           <div className="flex items-center gap-1.5 font-bold text-text-primary text-[11px]">
             <Building2 className="w-3.5 h-3.5 text-primary-navy shrink-0" />
-            <span>NSSTA / MoSPI</span>
+            <span>{t('navigation.mospiAffiliation', {}, 'NSSTA / MoSPI')}</span>
           </div>
           <p className="text-[10px] text-text-secondary leading-tight">
-            Capacity Building Commission • iGOT Karmayogi Aligned
+            {t('navigation.missionKarmayogi', {}, 'Capacity Building Commission • iGOT Karmayogi Aligned')}
           </p>
         </div>
 
@@ -164,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role = 'learner' }) => {
           className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-text-secondary hover:text-red-600 hover:bg-red-500/10 border border-border transition-colors duration-150"
         >
           <LogOut className="w-3.5 h-3.5" />
-          <span>Switch Persona / Sign Out</span>
+          <span>{t('navigation.switchPersona', {}, 'Switch Persona / Sign Out')}</span>
         </button>
       </div>
     </aside>

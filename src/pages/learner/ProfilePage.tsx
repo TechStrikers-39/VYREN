@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { learnerService, LearnerProfile, IgotStatus } from '@/services/api/learnerService';
 import { competencyService } from '@/services/api/competencyService';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/i18n';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 import { IntegrationModeBadge } from '@/components/ui/IntegrationModeBadge';
 import { CompetencyDossierModal } from '@/components/competency/CompetencyDossierModal';
 import { CompetencyScore, SkillGap } from '@/types';
 
 export const ProfilePage: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [profile, setProfile] = useState<LearnerProfile | null>(null);
   const [igotStatus, setIgotStatus] = useState<IgotStatus | null>(null);
@@ -255,6 +258,22 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Regional Language Preference Section */}
+      <div className="p-6 sm:p-8 rounded-2xl border border-border bg-surface shadow-xs space-y-4">
+        <div className="border-b border-border pb-4 space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🌐</span>
+            <h3 className="text-lg font-bold text-text-primary">
+              {t('profile.languagePreferenceTitle')}
+            </h3>
+          </div>
+          <p className="text-xs text-text-secondary">
+            {t('profile.languagePreferenceSub')}
+          </p>
+        </div>
+        <LanguageSelector variant="card" />
+      </div>
 
       {/* iGOT Karmayogi Competency Passport Section */}
       <div className="p-6 sm:p-8 rounded-2xl border-2 border-primary-navy/20 bg-surface shadow-sm space-y-6 relative overflow-hidden">

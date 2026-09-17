@@ -1,7 +1,10 @@
 import React from 'react';
 import SpecularButton from '../ui/SpecularButton';
+import { useTranslation } from '@/i18n';
 
 export const CtaSection: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="w-full bg-primary-navy py-20 lg:py-24 relative overflow-hidden">
       {/* Minimal Architectural Grid */}
@@ -11,16 +14,15 @@ export const CtaSection: React.FC = () => {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-white font-mono text-xs uppercase tracking-wider mb-6">
             <span className="w-2 h-2 rounded-full bg-action-blue"></span>
-            OFFICIAL CADRE ACCESS
+            {t('landing.badge')}
           </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl text-on-primary font-bold tracking-tight mb-4 leading-tight">
-            Start with what you know. <br />
-            Grow toward what you need.
+            {t('landing.ctaTitle')}
           </h2>
 
           <p className="text-base sm:text-lg text-white/80 leading-relaxed mb-8 max-w-xl">
-            Transition from speculative course browsing to empirical competency intelligence. Built specifically for institutional statistical rigor.
+            {t('landing.ctaSubtitle')}
           </p>
 
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
@@ -39,15 +41,15 @@ export const CtaSection: React.FC = () => {
               radius={9}
               proximity={260}
             >
-              <span>Get Started</span>
+              <span>{t('landing.getStartedBtn')}</span>
               <span className="material-symbols-outlined text-base">arrow_forward</span>
             </SpecularButton>
 
             <a 
               className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-white/25 text-on-primary font-medium hover:bg-white/10 transition-colors text-sm sm:text-base" 
-              href="#"
+              href="/login"
             >
-              Sign In
+              {t('navigation.signIn')}
             </a>
           </div>
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import EvidenceBreakdown from '@/components/assessment/EvidenceBreakdown';
 import { assessmentService } from '@/services/api/assessmentService';
+import { useTranslation, formatPercent } from '@/i18n';
 import { AssessmentResult } from '@/types';
 import { ROUTES } from '@/constants/routes';
 import {
@@ -28,6 +29,7 @@ const PROFICIENCY_LEVELS = [
 ];
 
 export const AssessmentResultPage: React.FC = () => {
+  const { t, locale } = useTranslation();
   const { assessmentId } = useParams<{ assessmentId: string }>();
   const location = useLocation();
 

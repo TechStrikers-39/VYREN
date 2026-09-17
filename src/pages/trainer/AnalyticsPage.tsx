@@ -4,6 +4,7 @@ import {
   TrainerCohortStats,
   LearnerCohortItem
 } from '@/services/api/trainerService';
+import { useTranslation } from '@/i18n';
 import {
   Users,
   AlertTriangle,
@@ -46,6 +47,7 @@ interface EnrichedLearner {
 }
 
 export const TrainerAnalyticsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [cohortStats, setCohortStats] = useState<TrainerCohortStats | null>(null);
   const [rawLearners, setRawLearners] = useState<LearnerCohortItem[]>([]);
   const [assessments, setAssessments] = useState<any[]>([]);
@@ -244,11 +246,10 @@ export const TrainerAnalyticsPage: React.FC = () => {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary-navy">
-            Cohort Competency Intelligence
+            {t('trainer.analyticsTitle')}
           </h1>
           <p className="text-sm text-text-secondary mt-1 max-w-3xl">
-            Institutional workforce capability diagnostics, competency distribution across proficiency bands,
-            and deterministic assessment evidence.
+            {t('trainer.analyticsSubtitle')}
           </p>
         </div>
 

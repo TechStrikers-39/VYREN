@@ -74,6 +74,7 @@ async def generate_items(
         difficulty=req.difficulty,
         count=req.count,
         focus_area=req.focus_area,
+        locale=req.locale,
     )
     return [GeneratedItem(**it) for it in raw_items]
 

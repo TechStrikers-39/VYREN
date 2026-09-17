@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/i18n';
 import { ROUTES } from '@/constants/routes';
 import VyrenLogo from '@/components/brand/VyrenLogo';
 import { AlertCircle, CheckCircle2, ShieldAlert, ArrowRight, UserCheck } from 'lucide-react';
 
 export const RegisterPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { register } = useAuth();
 
@@ -52,19 +54,19 @@ export const RegisterPage: React.FC = () => {
     <div className="min-h-[calc(100vh-4rem)] bg-surface-alt flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-xl mx-auto w-full space-y-6">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex justify-center mb-1">
+        <div className="flex flex-col items-center text-center space-y-3">
+          <div className="mb-1">
             <VyrenLogo size="lg" />
           </div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-navy/5 border border-primary-navy/15 text-[11px] font-mono font-semibold text-primary-navy uppercase tracking-wider">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-navy/5 border border-primary-navy/15 text-[11px] font-mono font-semibold text-primary-navy uppercase tracking-wider shadow-2xs">
             <UserCheck className="w-3 h-3" />
-            Official Profile Registration
+            {t('auth.registerPortalBadge')}
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
-            Register Official Account
+            {t('auth.registerHeading')}
           </h1>
           <p className="text-xs text-text-secondary max-w-md mx-auto leading-relaxed">
-            Establish your statistical competency profile on the MoSPI &amp; NSSTA intelligence network.
+            {t('auth.registerSubtitle')}
           </p>
         </div>
 
@@ -80,7 +82,7 @@ export const RegisterPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-mono font-semibold uppercase text-text-secondary mb-1.5">
-                Full Name *
+                {t('auth.fullName')} *
               </label>
               <input
                 type="text"
@@ -94,7 +96,7 @@ export const RegisterPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-mono font-semibold uppercase text-text-secondary mb-1.5">
-                Official Email Address *
+                {t('auth.emailAddress')} *
               </label>
               <input
                 type="email"
@@ -108,7 +110,7 @@ export const RegisterPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-mono font-semibold uppercase text-text-secondary mb-1.5">
-                Password *
+                {t('auth.password')} *
               </label>
               <input
                 type="password"
@@ -122,7 +124,7 @@ export const RegisterPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-mono font-semibold uppercase text-text-secondary mb-1.5">
-                System Role Intent *
+                {t('auth.role')} *
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <button
@@ -135,10 +137,10 @@ export const RegisterPage: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-text-primary">Government Official</span>
+                    <span className="font-bold text-xs text-text-primary">{t('auth.governmentOfficial')}</span>
                     {role === 'learner' && <CheckCircle2 className="w-3.5 h-3.5 text-primary-navy" />}
                   </div>
-                  <div className="text-[10px] text-text-secondary mt-0.5 font-mono">Statistical Cadre &amp; Diagnostic Path</div>
+                  <div className="text-[10px] text-text-secondary mt-0.5 font-mono">{t('auth.learnerRole')}</div>
                 </button>
                 <button
                   type="button"
@@ -150,10 +152,10 @@ export const RegisterPage: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-xs text-text-primary">Trainer / Assessor</span>
+                    <span className="font-bold text-xs text-text-primary">{t('auth.trainerAssessor')}</span>
                     {role === 'trainer' && <CheckCircle2 className="w-3.5 h-3.5 text-primary-navy" />}
                   </div>
-                  <div className="text-[10px] text-text-secondary mt-0.5 font-mono">MCQ Authoring Studio &amp; Cohorts</div>
+                  <div className="text-[10px] text-text-secondary mt-0.5 font-mono">{t('auth.trainerRole')}</div>
                 </button>
               </div>
               <p className="text-[11px] text-text-secondary/80 mt-2 flex items-center gap-1.5 font-mono">
@@ -164,7 +166,7 @@ export const RegisterPage: React.FC = () => {
 
             <div>
               <label className="block text-xs font-mono font-semibold uppercase text-text-secondary mb-1.5">
-                Organization / Ministry
+                {t('auth.organization')}
               </label>
               <input
                 type="text"
@@ -177,7 +179,7 @@ export const RegisterPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-mono font-semibold uppercase text-text-secondary mb-1.5">
-                  Department / Cadre
+                  {t('auth.department')}
                 </label>
                 <input
                   type="text"
@@ -188,7 +190,7 @@ export const RegisterPage: React.FC = () => {
               </div>
               <div>
                 <label className="block text-xs font-mono font-semibold uppercase text-text-secondary mb-1.5">
-                  Designation / Post
+                  {t('auth.designation')}
                 </label>
                 <input
                   type="text"
@@ -208,7 +210,7 @@ export const RegisterPage: React.FC = () => {
                 <span>Registering profile...</span>
               ) : (
                 <>
-                  <span>Create Account &amp; Continue</span>
+                  <span>{t('auth.createAccountBtn')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -216,9 +218,9 @@ export const RegisterPage: React.FC = () => {
           </form>
 
           <div className="text-center text-xs text-text-secondary pt-3 border-t border-border">
-            Already registered?{' '}
+            {t('auth.alreadyRegistered')}{' '}
             <Link to={ROUTES.AUTH.LOGIN} className="text-action-blue font-semibold hover:underline">
-              Sign In Here
+              {t('navigation.signIn')}
             </Link>
           </div>
         </div>

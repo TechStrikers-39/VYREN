@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { adminService, TrainingEffectivenessItem } from '@/services/api/adminService';
+import { useTranslation } from '@/i18n';
 import { BookOpen, Users, CheckCircle2, TrendingUp, Sparkles, ExternalLink } from 'lucide-react';
 
 export const AdminTrainingPage: React.FC = () => {
+  const { t } = useTranslation();
   const [programs, setPrograms] = useState<TrainingEffectivenessItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -33,9 +35,9 @@ export const AdminTrainingPage: React.FC = () => {
       {/* Header */}
       <div className="border-b border-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Training Program Effectiveness</h1>
+          <h1 className="text-2xl font-bold text-text-primary">{t('admin.trainingTitle')}</h1>
           <p className="text-sm text-text-secondary">
-            Enterprise oversight of iGOT Karmayogi courses, capacity development initiatives, and official completion rates.
+            {t('admin.trainingSubtitle')}
           </p>
         </div>
         <button

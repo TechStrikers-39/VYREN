@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/i18n';
 import { learnerService } from '@/services/api/learnerService';
 import { competencyService } from '@/services/api/competencyService';
 import IgotSearchCatalog from '@/components/catalog/IgotSearchCatalog';
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 
 export const LearningPathPage: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [learningPath, setLearningPath] = useState<LearningPathData | null>(null);
   const [scores, setScores] = useState<CompetencyScore[]>([]);
@@ -169,7 +171,7 @@ export const LearningPathPage: React.FC = () => {
               PERSONALIZED DEVELOPMENT PATH &bull; MoSPI NSSTA
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
-              Official Competency Development Plan
+              {t('learningPath.title')}
             </h1>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary">
               <span className="font-bold text-text-primary">{user?.name || 'Authorized Officer'}</span>

@@ -10,6 +10,7 @@ from app.schemas.auth import (
     RegisterRequest,
     UserProfileResponse,
 )
+from app.repositories.user_repo import UserRepository
 from app.utils.supabase_client import get_supabase
 
 settings = get_settings()
@@ -102,15 +103,13 @@ async def register(req: RegisterRequest):
         access_token = ""
         expires_in = None
 
-    profile_res = (
-        admin_client.table("profiles").select("*").eq("id", user_id).single().execute()
-    )
+    profile = UserRepository.get_profile(user_id) or {}
 
     return AuthResponse(
         access_token=access_token,
         token_type="bearer",
         expires_in=expires_in,
-        user=UserProfileResponse(**profile_res.data),
+        user=UserProfileResponse(**profile),
     )
 
 
@@ -150,11 +149,9 @@ async def login(req: LoginRequest):
 
     user_id = auth_response.user.id
 
-    profile_res = (
-        admin_client.table("profiles").select("*").eq("id", user_id).single().execute()
-    )
+    profile = UserRepository.get_profile(user_id)
 
-    if not profile_res.data:
+    if not profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User profile not found.",
@@ -164,7 +161,7 @@ async def login(req: LoginRequest):
         access_token=auth_response.session.access_token,
         token_type="bearer",
         expires_in=auth_response.session.expires_in,
-        user=UserProfileResponse(**profile_res.data),
+        user=UserProfileResponse(**profile),
     )
 
 

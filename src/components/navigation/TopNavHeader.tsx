@@ -2,7 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/constants/routes';
-import { LogOut, Shield } from 'lucide-react';
+import { useTranslation } from '@/i18n';
+import LanguageSelector from '@/components/ui/LanguageSelector';
+import { LogOut } from 'lucide-react';
 
 interface TopNavHeaderProps {
   roleBadge: string;
@@ -16,6 +18,7 @@ export const TopNavHeader: React.FC<TopNavHeaderProps> = ({
   subTitle,
 }) => {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -42,16 +45,18 @@ export const TopNavHeader: React.FC<TopNavHeaderProps> = ({
         <div className="hidden sm:flex items-center gap-2 text-xs text-text-secondary border-l border-border pl-3">
           <span className="font-semibold text-text-primary">{subTitle}</span>
           <span className="text-text-secondary/50">•</span>
-          <span className="text-[11px] font-mono text-text-secondary/80">MoSPI & NSSTA</span>
+          <span className="text-[11px] font-mono text-text-secondary/80">MoSPI &amp; NSSTA</span>
         </div>
       </div>
 
-      {/* Right: User Profile & Actions */}
-      <div className="flex items-center gap-4">
+      {/* Right: Language Selector, User Profile & Actions */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        <LanguageSelector variant="compact" />
+
         <div className="flex items-center gap-2.5 text-right">
           <div className="hidden md:block">
             <span className="block text-xs font-bold text-text-primary leading-tight">
-              {user?.name || 'Authorized Officer'}
+              {user?.name || t('auth.governmentOfficial', {}, 'Authorized Officer')}
             </span>
             <span className="block text-[10px] text-text-secondary font-mono truncate max-w-[200px]">
               {user?.designation || 'Statistical Cadre'} &bull; {user?.department || 'MoSPI'}
@@ -65,11 +70,11 @@ export const TopNavHeader: React.FC<TopNavHeaderProps> = ({
 
         <button
           onClick={handleSignOut}
-          title="Sign out or switch workspace"
+          title={t('navigation.switchPersona', {}, 'Sign out or switch workspace')}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-surface hover:bg-surface-alt text-text-secondary hover:text-text-primary text-xs font-semibold transition-colors duration-150 shadow-2xs"
         >
           <LogOut className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Switch Persona</span>
+          <span className="hidden sm:inline">{t('navigation.switchPersona', {}, 'Switch Persona')}</span>
         </button>
       </div>
     </header>

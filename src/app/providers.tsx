@@ -1,5 +1,6 @@
 import React from 'react';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { I18nProvider } from '@/i18n';
 
 export interface AppProvidersProps {
   children: React.ReactNode;
@@ -7,9 +8,11 @@ export interface AppProvidersProps {
 
 export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
-    <AuthProvider>
-      {children}
-    </AuthProvider>
+    <I18nProvider>
+      <AuthProvider>
+        {children}
+      </AuthProvider>
+    </I18nProvider>
   );
 };
 

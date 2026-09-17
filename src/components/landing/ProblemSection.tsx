@@ -1,19 +1,21 @@
 import React from 'react';
+import { useTranslation } from '@/i18n';
 
 export const ProblemSection: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <section className="w-full bg-surface py-20 lg:py-28 border-b border-border" id="problem">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="max-w-3xl mb-12 lg:mb-14">
           <span className="font-mono text-xs uppercase text-action-blue font-semibold tracking-wider">
-            [THE UP-SKILLING PARADOX]
+            [{t('landing.paradoxBadge', {}, 'THE UP-SKILLING PARADOX')}]
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight mt-2 mb-4">
-            Finding a course is easy. <br className="hidden sm:inline" />
-            Knowing what you actually need is harder.
+            {t('landing.paradoxTitle', {}, 'Training without measurement is just activity.')}
           </h2>
           <p className="text-base sm:text-lg text-text-secondary leading-relaxed">
-            Generic LMS catalogs offer thousands of broad lectures. Without objective diagnostic measurement, workforce learning is speculative—trainees waste dozens of hours re-studying concepts they already know while critical operational deficits remain unaddressed.
+            {t('landing.paradoxSubtitle', {}, 'Generic LMS catalogs offer thousands of broad lectures. Without objective diagnostic measurement, workforce learning is speculative—trainees waste dozens of hours re-studying concepts they already know while critical operational deficits remain unaddressed.')}
           </p>
         </div>
 
@@ -26,13 +28,13 @@ export const ProblemSection: React.FC = () => {
                 <span>STAGE 01</span>
                 <span className="px-1.5 py-0.5 rounded bg-surface-alt border border-border text-text-secondary font-semibold">BASELINE</span>
               </div>
-              <h3 className="text-sm font-bold text-text-primary mb-1">Evaluated Level</h3>
+              <h3 className="text-sm font-bold text-text-primary mb-1">{t('dashboard.colMeasured', {}, 'Evaluated Level')}</h3>
               <p className="text-xs text-text-secondary mb-4 leading-relaxed">
                 Objective competency baseline derived from diagnostic item-response evaluation.
               </p>
               <div className="mt-auto pt-3 border-t border-border flex items-baseline justify-between">
                 <span className="font-mono text-2xl font-bold text-text-primary">2.60</span>
-                <span className="font-mono text-[11px] text-warning-amber font-semibold">Developing</span>
+                <span className="font-mono text-[11px] text-warning-amber font-semibold">{t('levels.2.title', {}, 'Developing')}</span>
               </div>
             </div>
 
@@ -42,13 +44,13 @@ export const ProblemSection: React.FC = () => {
                 <span>STAGE 02</span>
                 <span className="px-1.5 py-0.5 rounded bg-surface-alt border border-border text-primary-navy font-semibold">BENCHMARK</span>
               </div>
-              <h3 className="text-sm font-bold text-text-primary mb-1">Benchmark Target</h3>
+              <h3 className="text-sm font-bold text-text-primary mb-1">{t('dashboard.colRequired', {}, 'Benchmark Target')}</h3>
               <p className="text-xs text-text-secondary mb-4 leading-relaxed">
                 Authoritative capability threshold required for official cadre designation.
               </p>
               <div className="mt-auto pt-3 border-t border-border flex items-baseline justify-between">
                 <span className="font-mono text-2xl font-bold text-primary-navy">4.00</span>
-                <span className="font-mono text-[11px] text-primary-navy font-semibold">Cadre Target</span>
+                <span className="font-mono text-[11px] text-primary-navy font-semibold">{t('levels.3.title', {}, 'Cadre Target')}</span>
               </div>
             </div>
 
@@ -58,13 +60,13 @@ export const ProblemSection: React.FC = () => {
                 <span>STAGE 03</span>
                 <span className="px-1.5 py-0.5 rounded bg-critical-surface border border-critical-border text-critical-red font-semibold">DELTA</span>
               </div>
-              <h3 className="text-sm font-bold text-text-primary mb-1">Diagnosed Deficit</h3>
+              <h3 className="text-sm font-bold text-text-primary mb-1">{t('dashboard.colDelta', {}, 'Diagnosed Deficit')}</h3>
               <p className="text-xs text-text-secondary mb-4 leading-relaxed">
                 Mathematical gap isolated specifically in Multi-Stage Stratified Sampling.
               </p>
               <div className="mt-auto pt-3 border-t border-border flex items-baseline justify-between">
                 <span className="font-mono text-2xl font-bold text-critical-red">-1.40</span>
-                <span className="font-mono text-[11px] text-critical-red font-semibold">Isolated Gap</span>
+                <span className="font-mono text-[11px] text-critical-red font-semibold">{t('priority.high', {}, 'Isolated Gap')}</span>
               </div>
             </div>
 
@@ -74,7 +76,7 @@ export const ProblemSection: React.FC = () => {
                 <span>STAGE 04</span>
                 <span className="px-1.5 py-0.5 rounded bg-surface-container-low border border-border text-action-blue font-semibold">ACTION</span>
               </div>
-              <h3 className="text-sm font-bold text-text-primary mb-1">Prescribed Focus</h3>
+              <h3 className="text-sm font-bold text-text-primary mb-1">{t('dashboard.colAction', {}, 'Prescribed Focus')}</h3>
               <p className="text-xs text-text-secondary mb-4 leading-relaxed">
                 Targeted micro-syllabus synthesized specifically to remediate the isolated deficit.
               </p>

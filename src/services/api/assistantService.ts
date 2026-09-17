@@ -31,13 +31,14 @@ export const assistantService = {
     return apiClient<AIStatus>('/assistant/status');
   },
 
-  async sendMessage(userPrompt: string, scores?: CompetencyScore[], gaps?: SkillGap[]): Promise<ChatMessage> {
+  async sendMessage(userPrompt: string, scores?: CompetencyScore[], gaps?: SkillGap[], locale?: string): Promise<ChatMessage> {
     try {
       const res = await apiClient<any>('/assistant/chat', {
         method: 'POST',
         body: JSON.stringify({
           message: userPrompt,
           history: [],
+          locale: locale || 'en',
         }),
       });
 

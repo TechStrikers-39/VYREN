@@ -45,5 +45,6 @@ async def chat_with_assistant(
         user_id=user_id,
         user_message=req.message,
         history=history_dicts,
+        locale=req.locale,
     )
     return ChatResponse(**res)

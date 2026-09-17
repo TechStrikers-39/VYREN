@@ -1,12 +1,22 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import SpecularButton from '../ui/SpecularButton';
+import { Link, useLocation } from 'react-router-dom';
 import VyrenLogo from '../brand/VyrenLogo';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROUTES } from '@/constants/routes';
+import { useTranslation } from '@/i18n';
+import LanguageSelector from '@/components/ui/LanguageSelector';
+import LandingNavbar from './LandingNavbar';
 
 export const Header: React.FC = () => {
+  const location = useLocation();
+  const isLanding = location.pathname === '/' || location.pathname === ROUTES.PUBLIC.HOME;
+
+  if (isLanding) {
+    return <LandingNavbar />;
+  }
+
   const { user, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
 
   const getWorkspaceRoute = () => {
     if (!user) return ROUTES.AUTH.LOGIN;
@@ -25,13 +35,23 @@ export const Header: React.FC = () => {
         </div>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-text-secondary">
-          <a className="text-primary-navy font-semibold transition-colors" href="/#overview">Overview</a>
-          <a className="hover:text-primary-navy transition-colors" href="/#problem">The Paradox</a>
-          <a className="hover:text-primary-navy transition-colors" href="/#how-it-works">How It Works</a>
-          <a className="hover:text-primary-navy transition-colors" href="/#why-vyren">Why VYREN</a>
+          <a className="text-primary-navy font-semibold transition-colors" href="/#overview">
+            {t('navigation.overview', {}, 'Overview')}
+          </a>
+          <a className="hover:text-primary-navy transition-colors" href="/#problem">
+            {t('navigation.theParadox', {}, 'The Paradox')}
+          </a>
+          <a className="hover:text-primary-navy transition-colors" href="/#how-it-works">
+            {t('navigation.howItWorks', {}, 'How It Works')}
+          </a>
+          <a className="hover:text-primary-navy transition-colors" href="/#why-vyren">
+            {t('navigation.whyVyren', {}, 'Why VYREN')}
+          </a>
         </nav>
 
         <div className="flex items-center gap-3">
+          <LanguageSelector variant="compact" />
+
           {isAuthenticated && user ? (
             <Link
               to={getWorkspaceRoute()}
@@ -46,13 +66,13 @@ export const Header: React.FC = () => {
                 to={ROUTES.AUTH.LOGIN}
                 className="px-3.5 py-2 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary transition-colors"
               >
-                Sign In
+                {t('common.signIn', {}, 'Sign In')}
               </Link>
               <Link
                 to={ROUTES.AUTH.LOGIN}
                 className="px-4 py-2 rounded-lg bg-primary-navy text-on-primary font-medium text-sm hover:opacity-95 transition-opacity"
               >
-                Get Started
+                {t('common.getStarted', {}, 'Get Started')}
               </Link>
             </>
           )}

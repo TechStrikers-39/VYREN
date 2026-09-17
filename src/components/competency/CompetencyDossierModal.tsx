@@ -1,5 +1,6 @@
 import React from 'react';
 import { LearnerProfile, IgotStatus } from '@/services/api/learnerService';
+import { useTranslation } from '@/i18n';
 import { CompetencyScore, SkillGap } from '@/types';
 
 export interface CompetencyDossierModalProps {
@@ -19,6 +20,7 @@ export const CompetencyDossierModal: React.FC<CompetencyDossierModalProps> = ({
   gaps,
   igotStatus,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   const handlePrint = () => {

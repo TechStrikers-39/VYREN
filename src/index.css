@@ -8,9 +8,6 @@
     padding: 0;
     font-family: 'Inter', sans-serif;
   }
-  body {
-    overscroll-behavior: none;
-  }
 }
 
 ::-webkit-scrollbar {

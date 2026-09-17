@@ -46,6 +46,7 @@ class ItemGenerateRequest(BaseModel):
     difficulty: str = Field("MEDIUM", description="EASY, MEDIUM, or HARD")
     count: int = Field(3, ge=1, le=5)
     focus_area: Optional[str] = None
+    locale: Optional[str] = "en"
 
 
 class GeneratedItemValidation(BaseModel):

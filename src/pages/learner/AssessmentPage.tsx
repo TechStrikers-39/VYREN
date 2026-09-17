@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AssessmentContextProvider, useAssessment } from '@/contexts/AssessmentContext';
+import { useTranslation } from '@/i18n';
 import { ROUTES } from '@/constants/routes';
 import {
   Clock,
@@ -16,6 +17,7 @@ import {
 } from 'lucide-react';
 
 const AssessmentInner: React.FC = () => {
+  const { t } = useTranslation();
   const { assessmentId } = useParams<{ assessmentId: string }>();
   const navigate = useNavigate();
   const {

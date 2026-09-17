@@ -146,6 +146,7 @@ class BaseAssistantProvider(ABC):
         user_id: str,
         user_message: str,
         history: Optional[List[dict]] = None,
+        locale: Optional[str] = "en",
     ) -> dict:
         pass
 
@@ -157,6 +158,7 @@ class BaseAssistantProvider(ABC):
         difficulty: str = "MEDIUM",
         count: int = 3,
         focus_area: Optional[str] = None,
+        locale: Optional[str] = "en",
     ) -> List[dict]:
         pass
 
@@ -174,66 +176,100 @@ class RealGeminiProvider(BaseAssistantProvider):
     async def _execute_gemini_request(self, payload: dict, req_id: str) -> dict:
         """
         Executes an asynchronous Gemini API request with safe telemetry,
-        exponential backoff retry for transient errors, and zero silent fallback.
+        exponential backoff retry for transient errors, and zero silent fallback to mock.
+        Tries gemini-3.8-flash first; if Google returns 429 quota exhaustion for that specific model,
+        tries subsequent real Gemini models (gemini-3.6-flash, gemini-3.5-flash) to maintain live service.
         """
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent?key={self.api_key}"
+        candidate_models = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"]
         last_error = None
 
-        for attempt in range(1, self.max_retries + 1):
-            t0 = time.perf_counter()
-            try:
-                async with httpx.AsyncClient(timeout=self.timeout) as client:
-                    resp = await client.post(url, json=payload)
+        for model in candidate_models:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={self.api_key}"
+            model_exhausted = False
+
+            for attempt in range(1, self.max_retries + 1):
+                t0 = time.perf_counter()
+                try:
+                    async with httpx.AsyncClient(timeout=self.timeout) as client:
+                        resp = await client.post(url, json=payload)
+                        latency_ms = round((time.perf_counter() - t0) * 1000, 2)
+
+                        if resp.status_code == 200:
+                            self.model_name = model
+                            # SAFE TELEMETRY LOGGING (No keys, no prompts, no secrets)
+                            logger.info(
+                                f"[AI Telemetry] request_id={req_id} provider={self.provider_name} "
+                                f"model={model} mode={self.mode} latency_ms={latency_ms} success=True"
+                            )
+                            return resp.json()
+
+                        # If 429 quota exhausted on this model, try next real Gemini model
+                        if resp.status_code == 429:
+                            resp_body = resp.text
+                            if "quota" in resp_body.lower() or "resource_exhausted" in resp_body.lower():
+                                logger.warning(
+                                    f"[AI Telemetry Warning] request_id={req_id} model={model} quota exhausted (429). "
+                                    f"Attempting live failover to next real Gemini model..."
+                                )
+                                model_exhausted = True
+                                last_error = f"Gemini {model} quota exhausted (429)"
+                                break
+
+                        # Handle retryable transient status codes (503 Service Unavailable, general 429)
+                        if resp.status_code in (503, 429) and attempt < self.max_retries:
+                            logger.warning(
+                                f"[AI Telemetry Warning] request_id={req_id} attempt={attempt} "
+                                f"model={model} status={resp.status_code}. Retrying with backoff..."
+                            )
+                            await asyncio.sleep(attempt * 1.5)
+                            continue
+
+                        # If 503 persist on this model, mark as high demand and try next model
+                        if resp.status_code == 503:
+                            logger.warning(
+                                f"[AI Telemetry Warning] request_id={req_id} model={model} experiencing high demand (503). "
+                                f"Attempting live failover to next real Gemini model..."
+                            )
+                            model_exhausted = True
+                            last_error = f"Gemini {model} high demand (503)"
+                            break
+
+                        # Non-retryable error (e.g. 400, 401, 403)
+                        logger.error(
+                            f"[AI Telemetry Error] request_id={req_id} provider={self.provider_name} "
+                            f"model={model} status={resp.status_code} latency_ms={latency_ms}"
+                        )
+                        last_error = f"Gemini API ({model}) returned HTTP {resp.status_code}"
+                        break
+
+                except (httpx.ReadTimeout, httpx.ConnectTimeout) as te:
                     latency_ms = round((time.perf_counter() - t0) * 1000, 2)
-
-                    if resp.status_code == 200:
-                        # SAFE TELEMETRY LOGGING (No keys, no prompts, no secrets)
-                        logger.info(
-                            f"[AI Telemetry] request_id={req_id} provider={self.provider_name} "
-                            f"model={self.model_name} mode={self.mode} latency_ms={latency_ms} success=True"
-                        )
-                        return resp.json()
-
-                    # Handle retryable transient status codes (503 Service Unavailable, 429 Rate Limit)
-                    if resp.status_code in (503, 429) and attempt < self.max_retries:
-                        logger.warning(
-                            f"[AI Telemetry Warning] request_id={req_id} attempt={attempt} "
-                            f"status={resp.status_code}. Retrying with backoff..."
-                        )
+                    logger.warning(
+                        f"[AI Telemetry Warning] request_id={req_id} attempt={attempt} "
+                        f"timeout after {latency_ms}ms. Retrying..."
+                    )
+                    last_error = f"Gemini API ({model}) request timed out"
+                    if attempt < self.max_retries:
                         await asyncio.sleep(attempt * 1.5)
                         continue
 
-                    # Non-retryable error
+                except Exception as e:
+                    latency_ms = round((time.perf_counter() - t0) * 1000, 2)
                     logger.error(
-                        f"[AI Telemetry Error] request_id={req_id} provider={self.provider_name} "
-                        f"model={self.model_name} status={resp.status_code} latency_ms={latency_ms}"
+                        f"[AI Telemetry Error] request_id={req_id} exception={type(e).__name__} latency_ms={latency_ms}"
                     )
-                    last_error = f"Gemini API returned HTTP {resp.status_code}"
+                    last_error = str(e)
                     break
 
-            except (httpx.ReadTimeout, httpx.ConnectTimeout) as te:
-                latency_ms = round((time.perf_counter() - t0) * 1000, 2)
-                logger.warning(
-                    f"[AI Telemetry Warning] request_id={req_id} attempt={attempt} "
-                    f"timeout after {latency_ms}ms. Retrying..."
-                )
-                last_error = "Gemini API request timed out"
-                if attempt < self.max_retries:
-                    await asyncio.sleep(attempt * 1.5)
-                    continue
-
-            except Exception as e:
-                latency_ms = round((time.perf_counter() - t0) * 1000, 2)
-                logger.error(
-                    f"[AI Telemetry Error] request_id={req_id} exception={type(e).__name__} latency_ms={latency_ms}"
-                )
-                last_error = str(e)
+            if not model_exhausted and last_error and any(code in last_error for code in ["400", "401", "403"]):
+                # Client-level authentication or validation error — don't loop through models
                 break
 
         # Strictly enforce fallback policy: Never silently use local fallback engine.
         raise AIProviderUnavailableException(
             message=f"Gemini AI is currently unavailable. Please verify the AI provider configuration. ({last_error})"
         )
+
 
     def get_status(self) -> dict:
         return {
@@ -262,6 +298,7 @@ class RealGeminiProvider(BaseAssistantProvider):
         user_id: str,
         user_message: str,
         history: Optional[List[dict]] = None,
+        locale: Optional[str] = "en",
     ) -> dict:
         req_id = f"req-{uuid.uuid4().hex[:8]}"
         t_start = time.perf_counter()
@@ -299,6 +336,25 @@ ARCHITECTURAL & GOVERNANCE RULES
    - Provide clear, authoritative, and pedagogically sound statistical guidance grounded in MoSPI standards, official survey methodology (e.g., NSS design effects, stratified sampling, econometric inference), modern data engineering (idempotent pipelines, CDC), and public data governance (DPDP Act 2023).
 3. ACTIONABLE GUIDANCE:
    - Explicitly cite the officer's active gaps and connect your explanations to recommended learning modules and practical statistical applications.
+"""
+
+        if locale == "hi":
+            system_instruction += """
+==================================================
+LANGUAGE REQUIREMENT (HINDI / हिन्दी)
+==================================================
+The user's active interface language is Hindi.
+You MUST compose your response in natural, fluent, professional, and grammatically accurate Hindi (हिन्दी).
+Technical terms (such as competency names like 'Sampling Techniques', 'Stratified Sampling', statistical formulas, MoSPI, NSSTA, DPDP Act 2023, and module IDs) may retain standard terminology or English terms in brackets, while your explanation, pedagogical advice, and greetings must be in Hindi.
+"""
+        elif locale == "mr":
+            system_instruction += """
+==================================================
+LANGUAGE REQUIREMENT (MARATHI / मराठी)
+==================================================
+The user's active interface language is Marathi.
+You MUST compose your response in natural, fluent, professional, and grammatically accurate Marathi (मराठी).
+Technical terms (such as competency names like 'Sampling Techniques', 'Stratified Sampling', statistical formulas, MoSPI, NSSTA, DPDP Act 2023, and module IDs) may retain standard terminology or English terms in brackets, while your explanation, pedagogical advice, and greetings must be in Marathi.
 """
 
         contents = [
@@ -358,10 +414,17 @@ ARCHITECTURAL & GOVERNANCE RULES
         difficulty: str = "MEDIUM",
         count: int = 3,
         focus_area: Optional[str] = None,
+        locale: Optional[str] = "en",
     ) -> List[dict]:
         req_id = f"req-{uuid.uuid4().hex[:8]}"
 
-        prompt_text = f"""You are an expert assessment item author for India's Official Statistical System (OSS), NSSTA, and MoSPI.
+        lang_instruction = ""
+        if locale == "hi":
+            lang_instruction = "\nLANGUAGE REQUIREMENT: Write the question prompt, all 4 options, and the pedagogical rationale in professional Hindi (हिन्दी). Standard statistical terminology may include English terms in brackets."
+        elif locale == "mr":
+            lang_instruction = "\nLANGUAGE REQUIREMENT: Write the question prompt, all 4 options, and the pedagogical rationale in professional Marathi (मराठी). Standard statistical terminology may include English terms in brackets."
+
+        prompt_text = f"""You are an expert assessment item author for India's Official Statistical System (OSS), NSSTA, and MoSPI.{lang_instruction}
 Generate exactly {count} rigorous, professional multiple-choice assessment questions (MCQs) for:
 - Competency: {competency_name}
 - Target Difficulty: {difficulty}
@@ -472,6 +535,7 @@ class UnavailableGeminiProvider(BaseAssistantProvider):
         user_id: str,
         user_message: str,
         history: Optional[List[dict]] = None,
+        locale: Optional[str] = "en",
     ) -> dict:
         raise AIProviderUnavailableException(
             "Gemini AI is currently unavailable. Please verify that GEMINI_API_KEY is configured in backend/.env."
@@ -484,6 +548,7 @@ class UnavailableGeminiProvider(BaseAssistantProvider):
         difficulty: str = "MEDIUM",
         count: int = 3,
         focus_area: Optional[str] = None,
+        locale: Optional[str] = "en",
     ) -> List[dict]:
         raise AIProviderUnavailableException(
             "Gemini AI is currently unavailable. Please verify that GEMINI_API_KEY is configured in backend/.env."
@@ -507,11 +572,13 @@ class AIAssistantService:
         user_id: str,
         user_message: str,
         history: Optional[List[dict]] = None,
+        locale: Optional[str] = "en",
     ) -> dict:
         return await get_ai_provider().generate_response(
             user_id=user_id,
             user_message=user_message,
             history=history,
+            locale=locale,
         )
 
     @staticmethod
@@ -521,6 +588,7 @@ class AIAssistantService:
         difficulty: str = "MEDIUM",
         count: int = 3,
         focus_area: Optional[str] = None,
+        locale: Optional[str] = "en",
     ) -> List[dict]:
         return await get_ai_provider().generate_assessment_items(
             competency_name=competency_name,
@@ -528,4 +596,6 @@ class AIAssistantService:
             difficulty=difficulty,
             count=count,
             focus_area=focus_area,
+            locale=locale,
         )
+

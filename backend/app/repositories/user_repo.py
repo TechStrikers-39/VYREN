@@ -15,8 +15,7 @@ class UserRepository:
         if igot_id.startswith("CTX:"):
             try:
                 ctx = json.loads(igot_id[4:])
-                if profile.get("onboarding_completed") is None:
-                    profile["onboarding_completed"] = ctx.get("onboarded", True)
+                profile["onboarding_completed"] = bool(ctx.get("onboarded", True))
                 if not profile.get("responsibilities"):
                     profile["responsibilities"] = ctx.get("resp")
                 if not profile.get("tools_experience"):
@@ -27,6 +26,11 @@ class UserRepository:
                     profile["target_competencies"] = ctx.get("targets") or []
             except Exception:
                 pass
+        
+        # Ensure onboarding_completed is always a clean boolean
+        if "onboarding_completed" not in profile or profile["onboarding_completed"] is None:
+            profile["onboarding_completed"] = False
+
         return profile
 
     @staticmethod

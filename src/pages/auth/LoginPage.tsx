@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/i18n';
 import { ROUTES } from '@/constants/routes';
 import VyrenLogo from '@/components/brand/VyrenLogo';
 import { Shield, GraduationCap, BarChart3, AlertCircle, Info, Lock, ArrowRight } from 'lucide-react';
@@ -29,6 +30,7 @@ const PERSONA_CONFIG: Record<PersonaType, { label: string; icon: React.Component
 };
 
 export const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, isAuthenticated, login, googleLogin, logout } = useAuth();
 
@@ -42,9 +44,7 @@ export const LoginPage: React.FC = () => {
   const handlePersonaSelect = (persona: PersonaType) => {
     setSelectedPersona(persona);
     setEmail(PERSONA_CONFIG[persona].defaultEmail);
-    if (persona === 'trainer') setPassword('TrainerPassword123!');
-    else if (persona === 'admin') setPassword('AdminPassword123!');
-    else setPassword('SecurePassword123!');
+    setPassword('SecurePassword123!');
   };
 
   const routeByRole = (authenticatedRole: string, onboardingCompleted?: boolean) => {
@@ -100,19 +100,19 @@ export const LoginPage: React.FC = () => {
     <div className="min-h-[calc(100vh-4rem)] bg-surface-alt flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto w-full space-y-6">
         {/* Brand Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex justify-center mb-1">
+        <div className="flex flex-col items-center text-center space-y-3">
+          <div className="mb-1">
             <VyrenLogo size="lg" />
           </div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-navy/5 border border-primary-navy/15 text-[11px] font-mono font-semibold text-primary-navy uppercase tracking-wider">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-navy/5 border border-primary-navy/15 text-[11px] font-mono font-semibold text-primary-navy uppercase tracking-wider shadow-2xs">
             <Lock className="w-3 h-3" />
-            Official Authentication Portal
+            {t('auth.portalBadge')}
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
-            Sign In to VYREN
+            {t('auth.signInHeading')}
           </h1>
           <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">
-            National Statistical Systems Training Academy & MoSPI Competency Intelligence Platform.
+            {t('auth.signInSubtitle')}
           </p>
         </div>
 
@@ -143,7 +143,7 @@ export const LoginPage: React.FC = () => {
                 onClick={() => logout()}
                 className="px-2.5 py-1.5 rounded-lg border border-border bg-white text-text-secondary text-xs hover:bg-surface-alt transition shadow-2xs"
               >
-                Sign Out
+                {t('navigation.logout')}
               </button>
             </div>
           </div>
@@ -155,7 +155,7 @@ export const LoginPage: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-[11px] font-mono font-semibold uppercase tracking-wider text-text-secondary">
-                Role Intent (Testing Quick-Switch)
+                {t('auth.selectPersona')}
               </label>
               <span className="text-[10px] font-mono text-text-secondary/70">RBAC Verified</span>
             </div>
@@ -164,22 +164,26 @@ export const LoginPage: React.FC = () => {
                 const cfg = PERSONA_CONFIG[p];
                 const Icon = cfg.icon;
                 const isSelected = selectedPersona === p;
+                const personaName = p === 'learner' ? t('auth.governmentOfficial') : p === 'trainer' ? t('auth.trainerAssessor') : t('auth.administrator');
+                const personaHint = p === 'learner' ? t('auth.mospiStatisticalOfficer') : p === 'trainer' ? t('auth.cbcOfficer') : t('auth.systemTelemetry');
                 return (
                   <button
                     key={p}
                     type="button"
                     onClick={() => handlePersonaSelect(p)}
-                    className={`p-2.5 rounded-xl border text-left transition flex flex-col items-start gap-1.5 min-w-0 w-full ${
+                    className={`p-2.5 rounded-xl border text-left transition flex flex-col items-start gap-2 min-w-0 w-full h-full ${
                       isSelected
                         ? 'border-primary-navy bg-primary-navy/5 text-primary-navy ring-1 ring-primary-navy shadow-2xs font-semibold'
                         : 'border-border bg-surface-alt text-text-secondary hover:border-border-strong hover:bg-surface'
                     }`}
                   >
                     <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-primary-navy' : 'text-text-secondary'}`} />
-                    <div className="min-w-0 w-full">
-                      <span className="text-xs font-bold block truncate">{cfg.label.split('/')[0].trim()}</span>
-                      <span className="text-[9px] text-text-secondary block truncate font-mono" title={cfg.hint}>
-                        {cfg.hint}
+                    <div className="w-full flex-1 flex flex-col">
+                      <span className="text-xs font-bold block leading-tight whitespace-normal break-words min-h-[2rem] flex items-start">
+                        {personaName}
+                      </span>
+                      <span className="text-[10px] text-text-secondary block font-mono leading-tight whitespace-normal break-words mt-1">
+                        {personaHint}
                       </span>
                     </div>
                   </button>
@@ -248,7 +252,7 @@ export const LoginPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-mono font-semibold uppercase text-text-secondary mb-1.5">
-                Work Email
+                {t('auth.emailAddress')}
               </label>
               <input
                 type="email"
@@ -263,9 +267,9 @@ export const LoginPage: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-mono font-semibold uppercase text-text-secondary">
-                  Password
+                  {t('auth.password')}
                 </label>
-                <span className="text-[10px] text-text-secondary font-mono">Demo Auto-filled</span>
+                <span className="text-[10px] text-text-secondary font-mono">{t('auth.quickFill')}</span>
               </div>
               <input
                 type="password"
@@ -283,10 +287,10 @@ export const LoginPage: React.FC = () => {
               className="w-full py-2.5 rounded-xl bg-primary-navy text-on-primary font-bold text-sm hover:bg-primary-navy/90 transition shadow-xs disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
             >
               {isSubmitting ? (
-                <span>Authenticating session...</span>
+                <span>{t('auth.authenticating')}</span>
               ) : (
                 <>
-                  <span>Sign In as {PERSONA_CONFIG[selectedPersona].label.split('/')[0]}</span>
+                  <span>{t('auth.authenticateBtn')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -295,9 +299,9 @@ export const LoginPage: React.FC = () => {
 
           {/* Registration Link */}
           <div className="text-center text-xs text-text-secondary pt-3 border-t border-border">
-            Need an authorized learner or trainer account?{' '}
+            {t('auth.noAccount')}{' '}
             <Link to={ROUTES.PUBLIC.REGISTER} className="text-action-blue font-semibold hover:underline">
-              Register Official Account
+              {t('auth.registerTitle')}
             </Link>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/i18n';
 import { ROUTES } from '@/constants/routes';
 import GridScan from '@/components/ui/GridScan';
 import { ShieldCheck, BookOpen, Wrench, BarChart2, Target, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
@@ -34,6 +35,7 @@ const TARGET_COMPETENCY_OPTIONS = [
 ];
 
 export const OnboardingPage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, submitOnboarding } = useAuth();
 
@@ -114,24 +116,24 @@ export const OnboardingPage: React.FC = () => {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-navy/10 border border-primary-navy/20 text-primary-navy text-xs font-mono font-bold mb-3 uppercase tracking-wider">
             <ShieldCheck className="w-3.5 h-3.5" />
-            Official Government Intake • Step {step} of 5
+            {t('onboarding.title')} • Step {step} of 5
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-text-primary">
-            Welcome to VYREN Competency Platform
+            {t('onboarding.title')}
           </h1>
           <p className="mt-2 text-sm text-text-secondary max-w-xl mx-auto leading-relaxed">
-            Please provide your official statistical context. This establishes your role-based baseline requirements and training alignment.
+            {t('onboarding.subtitle')}
           </p>
         </div>
 
         {/* 5-Step Progress Stepper */}
         <div className="flex items-center justify-between max-w-xl mx-auto mb-8 px-4">
           {[
-            { num: 1, id: '01', label: 'Role' },
-            { num: 2, id: '02', label: 'Responsibilities' },
-            { num: 3, id: '03', label: 'Tools' },
-            { num: 4, id: '04', label: 'Experience' },
-            { num: 5, id: '05', label: 'Goals' },
+            { num: 1, id: '01', label: t('onboarding.step1Title') },
+            { num: 2, id: '02', label: t('onboarding.step2Title') },
+            { num: 3, id: '03', label: t('onboarding.step3Title') },
+            { num: 4, id: '04', label: t('onboarding.step4Title') },
+            { num: 5, id: '05', label: t('onboarding.step5Title') },
           ].map((s, idx) => (
             <React.Fragment key={s.num}>
               <div className="flex flex-col items-center gap-1.5">
@@ -400,7 +402,7 @@ export const OnboardingPage: React.FC = () => {
                 onClick={() => setStep(step - 1)}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-alt text-text-secondary text-sm font-semibold transition shadow-2xs"
               >
-                <ArrowLeft className="w-4 h-4" /> Previous
+                <ArrowLeft className="w-4 h-4" /> {t('common.previous')}
               </button>
             ) : (
               <div />
@@ -412,7 +414,7 @@ export const OnboardingPage: React.FC = () => {
                 onClick={() => setStep(step + 1)}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-navy hover:bg-primary-navy/90 text-on-primary text-sm font-bold transition shadow-xs"
               >
-                Next Step <ArrowRight className="w-4 h-4" />
+                {t('common.next')} <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
               <button
@@ -421,7 +423,7 @@ export const OnboardingPage: React.FC = () => {
                 onClick={handleSubmit}
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-navy hover:bg-primary-navy/90 text-on-primary text-sm font-bold transition shadow-sm disabled:opacity-50"
               >
-                {submitting ? 'Saving Profile...' : 'Complete Intake & Enter Dashboard'}
+                {submitting ? 'Saving Profile...' : t('onboarding.completeIntakeBtn')}
                 <CheckCircle2 className="w-4 h-4" />
               </button>
             )}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { adminService, AdminUser } from '@/services/api/adminService';
+import { useTranslation } from '@/i18n';
 import {
   FileSpreadsheet,
   RefreshCw,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react';
 
 export const AdminLearnersPage: React.FC = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,9 +70,9 @@ export const AdminLearnersPage: React.FC = () => {
       {/* Header */}
       <div className="border-b border-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Workforce Directory</h1>
+          <h1 className="text-2xl font-bold text-text-primary">{t('admin.learnersTitle')}</h1>
           <p className="text-sm text-text-secondary">
-            Manage organization data professionals, active roles, and measured competency indices.
+            {t('admin.learnersSubtitle')}
           </p>
         </div>
         <div className="flex items-center gap-2">

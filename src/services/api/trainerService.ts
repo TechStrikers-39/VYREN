@@ -37,6 +37,7 @@ export interface ItemGenerateRequest {
   difficulty?: number;
   count?: number;
   focus_area?: string;
+  locale?: string;
 }
 
 export interface AssessmentItemPayload {

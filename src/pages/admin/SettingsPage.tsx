@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { adminService, SystemStatus } from '@/services/api/adminService';
 import { igotService, IgotStatus } from '@/services/api/igotService';
 import { assistantService, AIStatus } from '@/services/api/assistantService';
+import { useTranslation } from '@/i18n';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 import {
   Server,
   Database,
@@ -18,6 +20,7 @@ import {
 } from 'lucide-react';
 
 export const AdminSettingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [igotStatus, setIgotStatus] = useState<IgotStatus | null>(null);
   const [aiStatus, setAiStatus] = useState<AIStatus | null>(null);
@@ -93,9 +96,9 @@ export const AdminSettingsPage: React.FC = () => {
       {/* Header */}
       <div className="border-b border-border pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">System & Provider Diagnostics</h1>
+          <h1 className="text-2xl font-bold text-text-primary">{t('admin.settingsTitle')}</h1>
           <p className="text-sm text-text-secondary">
-            Live telemetry for FastAPI monolith, Sunbird iGOT gateway, Gemini AI engine, and Supabase database.
+            {t('admin.settingsSubtitle')}
           </p>
         </div>
         <button
@@ -104,8 +107,27 @@ export const AdminSettingsPage: React.FC = () => {
           className="px-3.5 py-1.5 rounded-xl border border-border text-xs font-semibold text-text-secondary hover:bg-surface-alt transition flex items-center gap-1.5 shrink-0"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          <span>Refresh Telemetry</span>
+          <span>{t('admin.refreshTelemetryBtn')}</span>
         </button>
+      </div>
+
+      {/* Regional Language & Localization Settings Card */}
+      <div className="p-6 rounded-2xl border border-border bg-surface shadow-xs space-y-4">
+        <div className="border-b border-border pb-4 space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🌐</span>
+            <h3 className="font-bold text-base text-text-primary">
+              {t('admin.languageSettingsTitle')}
+            </h3>
+          </div>
+          <p className="text-xs text-text-secondary">
+            {t('admin.languageSettingsSubtitle')}
+          </p>
+        </div>
+        <LanguageSelector variant="card" />
+        <div className="text-[11px] font-mono text-text-secondary pt-2 border-t border-border">
+          {t('admin.switchLangHelp')}
+        </div>
       </div>
 
       {/* Grid of Provider Health Cards */}

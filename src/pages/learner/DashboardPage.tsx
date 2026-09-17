@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation, formatPercent } from '@/i18n';
 import { competencyService } from '@/services/api/competencyService';
 import { recommendationService } from '@/services/api/recommendationService';
 import { learnerService } from '@/services/api/learnerService';
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 
 export const LearnerDashboardPage: React.FC = () => {
+  const { t, locale } = useTranslation();
   const { user } = useAuth();
   const [scores, setScores] = useState<CompetencyScore[]>([]);
   const [gaps, setGaps] = useState<SkillGap[]>([]);
@@ -101,7 +103,7 @@ export const LearnerDashboardPage: React.FC = () => {
               CADRE BASELINE &bull; MoSPI &amp; NSSTA
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
-              Competency Intelligence Workspace
+              {t('dashboard.title')}
             </h1>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-secondary pt-1">
               <span className="font-bold text-text-primary">{user?.name || 'Authorized Officer'}</span>
@@ -111,7 +113,7 @@ export const LearnerDashboardPage: React.FC = () => {
               <span>{user?.department || 'National Statistical Systems Training Academy (NSSTA)'}</span>
             </div>
             <p className="text-xs text-text-secondary/80 max-w-2xl leading-relaxed">
-              Deterministic competency baseline evaluated against official NSSTA job matrices and Mission Karmayogi standards. Diagnostic evaluations establish verified capability levels distinct from self-reported context.
+              {t('dashboard.subtitle')}
             </p>
           </div>
 
@@ -120,7 +122,7 @@ export const LearnerDashboardPage: React.FC = () => {
               to={ROUTES.LEARNER.ASSESSMENT('a1000000-0000-0000-0000-000000000001')}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-navy hover:bg-primary-navy/90 text-on-primary font-bold text-xs sm:text-sm transition shadow-xs"
             >
-              <span>Take Diagnostic Assessment</span>
+              <span>{t('dashboard.takeAssessmentBtn')}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -260,11 +262,11 @@ export const LearnerDashboardPage: React.FC = () => {
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-border bg-surface-alt/70 font-mono text-[11px] uppercase tracking-wider text-text-secondary">
-                    <th className="py-3 px-4 sm:px-6 font-semibold">Competency Domain</th>
-                    <th className="py-3 px-4 font-semibold">Measured Level</th>
-                    <th className="py-3 px-4 font-semibold">Cadre Required</th>
-                    <th className="py-3 px-4 font-semibold">Skill Gap Delta</th>
-                    <th className="py-3 px-4 sm:px-6 font-semibold text-right sm:text-left">Priority</th>
+                    <th className="py-3 px-4 sm:px-6 font-semibold">{t('dashboard.colCompetency')}</th>
+                    <th className="py-3 px-4 font-semibold">{t('dashboard.colMeasured')}</th>
+                    <th className="py-3 px-4 font-semibold">{t('dashboard.colRequired')}</th>
+                    <th className="py-3 px-4 font-semibold">{t('dashboard.colDelta')}</th>
+                    <th className="py-3 px-4 sm:px-6 font-semibold text-right sm:text-left">{t('dashboard.colPriority')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">

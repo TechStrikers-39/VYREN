@@ -4,6 +4,7 @@ import { assistantService, ChatMessage, AIStatus } from '@/services/api/assistan
 import { competencyService } from '@/services/api/competencyService';
 import { learnerService } from '@/services/api/learnerService';
 import { recommendationService } from '@/services/api/recommendationService';
+import { useTranslation } from '@/i18n';
 import { CompetencyScore, SkillGap, Recommendation, LearningPathData } from '@/types';
 import { IntegrationModeBadge } from '@/components/ui/IntegrationModeBadge';
 import { ROUTES } from '@/constants/routes';
@@ -27,6 +28,7 @@ import {
 } from 'lucide-react';
 
 export const AssistantPage: React.FC = () => {
+  const { t, locale } = useTranslation();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'init-1',
@@ -133,7 +135,7 @@ export const AssistantPage: React.FC = () => {
     setIsTyping(true);
 
     try {
-      const aiReply = await assistantService.sendMessage(query, scores, gaps);
+      const aiReply = await assistantService.sendMessage(query, scores, gaps, locale);
       let replyText = aiReply.text;
       if (gapSize === 0) {
         // Presentation grounding guard: if gapSize is 0, affirm benchmarks are met
@@ -197,10 +199,10 @@ export const AssistantPage: React.FC = () => {
             <span>NSSTA &bull; CAPACITY BUILDING COMMISSION ALIGNED</span>
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-text-primary">
-            Grounded Competency Assistant
+            {t('assistant.title')}
           </h1>
           <p className="text-xs text-text-secondary leading-relaxed">
-            Analytical intelligence layer providing deterministic explanations of your measured competencies, cadre skill gaps, and learning pathways.
+            {t('assistant.subtitle')}
           </p>
         </div>
 
@@ -492,7 +494,7 @@ export const AssistantPage: React.FC = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             disabled={isTyping}
-            placeholder="Ask about your skill gaps, course recommendations, or MoSPI statistical concepts..."
+            placeholder={t('assistant.inputPlaceholder')}
             className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-surface text-xs sm:text-sm text-text-primary placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary-navy/20 focus:border-primary-navy transition"
             aria-label="Ask VYREN Competency Assistant"
           />
@@ -503,7 +505,7 @@ export const AssistantPage: React.FC = () => {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-navy hover:bg-primary-navy/90 text-on-primary font-bold text-xs sm:text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-xs shrink-0"
             aria-label="Send message"
           >
-            <span>Send</span>
+            <span>{t('assistant.sendBtn')}</span>
             <Send className="w-3.5 h-3.5" />
           </button>
         </form>
