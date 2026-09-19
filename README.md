@@ -180,12 +180,15 @@ $$S_c = rac{\sum_{i=1}^{n_c} w_i \cdot y_i}{\sum_{i=1}^{n_c} w_i} 	imes 100$$
 #### 2. Empirical Skill Gap Delta
 The capability deficit $\Delta_c$ relative to the mandatory cadre benchmark $B_c$ (Level 3 = 70%):
 
-$$\Delta_c = \max\left(0,\, B_c - S_cight)$$
+$$\Delta_c = \max\left(0,\, B_c - S_c
+ight)$$
 
 #### 3. Independent Evidence Confidence ($C_c \in [0.00, 1.00]$)
 Evidence Confidence reflects **empirical certainty** based on item sampling density $n_c$, required benchmark items $N_{	ext{req}}$, and variance in response patterns $\sigma_c^2$:
 
-$$C_c = \min\left(1.0,\, rac{n_c}{N_{	ext{req}}}ight) 	imes \left(1.0 - rac{\sigma_c}{2}ight)$$
+$$C_c = \min\left(1.0,\, rac{n_c}{N_{	ext{req}}}
+ight) 	imes \left(1.0 - rac{\sigma_c}{2}
+ight)$$
 
 > [!NOTE]
 > Evidence Confidence is an independent epistemic indicator—**never** an arbitrary inflation factor. A learner scoring 100% on a single question will have a high score but a low Evidence Confidence ($pprox 0.25$), prompting targeted verification items in subsequent checks.
@@ -504,7 +507,7 @@ Language switching operates seamlessly without page reloading and persists acros
 
 ---
 
-## 👥 Team TΣCH STRIKΣRS
+## 👥 Team T8CH STRIK8RS
 
 Proudly developed for **Smart India Hackathon 2026**.
 
