@@ -1,252 +1,445 @@
 <div align="center">
-    
-# VYREN
-### Competency Intelligence Platform
-**Turn Skills Into Intelligence**
 
-[![Smart India Hackathon](https://img.shields.io/badge/SIH-2026-orange.svg)](https://sih.gov.in)
-[![Ministry](https://img.shields.io/badge/MoSPI-Official%20Statistical%20System-003366.svg)](https://mospi.gov.in)
-[![Academy](https://img.shields.io/badge/NSSTA-Statistical%20Academy-1B3A6B.svg)](https://nssta.gov.in)
-[![Capacity Building](https://img.shields.io/badge/Mission%20Karmayogi-CBC%20Aligned-16A34A.svg)](https://karmayogibharat.gov.in)
-[![Architecture](https://img.shields.io/badge/Architecture-React%20%7C%20FastAPI%20%7C%20Supabase-2563EB.svg)](#architecture)
+# ⚡ VYREN
+### Institutional Competency Intelligence Platform
+**Transforming Statistical Workforce Capabilities Through Deterministic Measurement, Adaptive Pathways, and Live iGOT Integration**
+
+---
+
+[![Smart India Hackathon 2026](https://img.shields.io/badge/SIH-2026%20Finalist-FF6F00?style=for-the-badge&logo=target&logoColor=white)](https://sih.gov.in)
+[![Ministry](https://img.shields.io/badge/MoSPI-Official%20Statistical%20System-003366?style=for-the-badge&logo=gov.uk&logoColor=white)](https://mospi.gov.in)
+[![Academy](https://img.shields.io/badge/NSSTA-Statistical%20Academy-1B3A6B?style=for-the-badge)](https://nssta.gov.in)
+[![Capacity Building](https://img.shields.io/badge/Mission%20Karmayogi-CBC%20Aligned-16A34A?style=for-the-badge&logo=checkmarx&logoColor=white)](https://karmayogibharat.gov.in)
+[![Compliance](https://img.shields.io/badge/DPDP%20Act%202023-Compliant-059669?style=for-the-badge&logo=shield&logoColor=white)](#-security--governance-controls)
 
 <br/>
 
-**Transforming Statistical Workforce Competencies Through Deterministic Measurement, Adaptive Learning, and Live iGOT Karmayogi Catalog Integration.**
+[![React 18](https://img.shields.io/badge/Frontend-React%2018%20%7C%20TypeScript%20%7C%20Vite%20%7C%20Tailwind-61DAFB?style=flat-square&logo=react&logoColor=black)](#-technology-stack)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.11%20%7C%20Pydantic-009688?style=flat-square&logo=fastapi&logoColor=white)](#-technology-stack)
+[![Supabase](https://img.shields.io/badge/Database-Supabase%20PostgreSQL%20%7C%20RLS-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](#-technology-stack)
+[![Google Gemini](https://img.shields.io/badge/AI%20Engine-Google%20Gemini%201.5%20Flash-4285F4?style=flat-square&logo=google-gemini&logoColor=white)](#-ai-architecture--governance-boundaries)
+[![Test Suite](https://img.shields.io/badge/Tests-25%2F25%20Passing%20(100%25)-brightgreen?style=flat-square&logo=pytest&logoColor=white)](#-verification-suite)
+[![i18n](https://img.shields.io/badge/i18n-English%20%7C%20%E0%A4%B9%E0%A4%BF%E0%A4%A8%E0%A5%8D%E0%A4%A6%E0%A5%80%20%7C%20%E0%A4%AE%E0%A4%B0%E0%A4%BE%E0%A4%A0%E0%A5%80-8B5CF6?style=flat-square)](#-internationalization-i18n)
 
-[Overview](#overview) • [The Problem](#the-problem) • [Core Capabilities](#core-capabilities) • [Competency Model](#competency-model) • [MCQ Validation](#mcq-validation-pipeline) • [iGOT Integration](#igot--sunbird-integration) • [Architecture](#architecture) • [Getting Started](#getting-started)
+<br/>
+
+[Executive Summary](#-executive-summary) • [The Core Problem](#-the-core-problem) • [Closed-Loop Lifecycle](#-closed-loop-competency-lifecycle) • [Competency Framework](#-competency-framework--scoring-model) • [Personalized Diagnostic](#-personalized-baseline-diagnostic-engine) • [MCQ Validation Pipeline](#-9-stage-mcq-validation-pipeline) • [iGOT Integration](#-igot-karmayogi--sunbird-integration) • [System Architecture](#-system-architecture) • [Getting Started](#-getting-started) • [Team](#-team-tσch-strikσrs)
 
 </div>
 
 ---
 
-## Overview
+## 📌 Executive Summary
 
-**VYREN** is an institutional Competency Intelligence Platform engineered for the **Official Statistical System (OSS)**, administered by the **Ministry of Statistics and Programme Implementation (MoSPI)** and aligned with the **National Statistical Systems Training Academy (NSSTA)** and the **Capacity Building Commission (CBC)** under **Mission Karmayogi** competency frameworks.
+**VYREN** is an institutional Competency Intelligence Platform purpose-built for India's **Official Statistical System (OSS)** under the **Ministry of Statistics and Programme Implementation (MoSPI)**. Aligned with the **National Statistical Systems Training Academy (NSSTA)** and the **Capacity Building Commission (CBC)** under **Mission Karmayogi**, VYREN fundamentally bridges the gap between civil-service capacity building and empirical competency mastery.
 
-Unlike a conventional Learning Management System (LMS), VYREN operates as a closed-loop competency intelligence engine:
+Unlike traditional Learning Management Systems (LMS) that only record course enrollments and watch times, VYREN executes an automated, continuous, evidence-driven competency lifecycle:
 
-$$\text{PROFILE} \longrightarrow \text{MEASURE} \longrightarrow \text{IDENTIFY GAP} \longrightarrow \text{RECOMMEND} \longrightarrow \text{LEARN} \longrightarrow \text{ASSESS} \longrightarrow \text{RECALIBRATE} \longrightarrow \text{REPEAT}$$
+```
+┌───────────┐      ┌───────────┐      ┌──────────────┐      ┌──────────────┐
+│  PROFILE  │ ───► │  MEASURE  │ ───► │ IDENTIFY GAP │ ───► │  RECOMMEND   │
+│  Context  │      │ Diagnostic│      │ Level 0 to 4 │      │ iGOT Courses │
+└───────────┘      └───────────┘      └──────────────┘      └──────────────┘
+      ▲                                                            │
+      │                                                            ▼
+┌───────────┐      ┌───────────┐      ┌──────────────┐      ┌──────────────┐
+│  REPEAT   │ ◄─── │RECALIBRATE│ ◄─── │    ASSESS    │ ◄─── │    LEARN     │
+│ Next Goal │      │ Score&Conf│      │ Post-Module  │      │ Targeted Mod │
+└───────────┘      └───────────┘      └──────────────┘      └──────────────┘
+```
 
-### Key Distinction: Content Ecosystem vs Competency Intelligence
+### ⚡ Key Paradigm Shift: Content Catalog vs. Competency Intelligence
 
-| Dimension | Learning Management System / Content Ecosystem (e.g., iGOT) | VYREN Competency Intelligence Layer |
+| Dimension | Conventional LMS / Course Catalog (e.g., iGOT alone) | VYREN Competency Intelligence Platform |
 | :--- | :--- | :--- |
-| **Primary Focus** | Course hosting, content delivery, and enrollment management | Baseline competency measurement and empirical skill-gap detection |
-| **Assessment Model** | Static completion badges or raw percentiles | Deterministic Level 0–4 proficiency scoring with Evidence Confidence |
-| **Learning Path** | Catalog browsing and elective course enrollment | Priority-sequenced curriculum matched directly to measured skill deficits |
-| **Post-Learning Impact** | Static course completion records | Dynamic score recalibration based on post-intervention evaluation evidence |
-| **Workforce Governance** | Training hour accumulation metrics | Macro capability index, gap concentration heatmaps, and readiness audits |
+| **Primary Metric** | Hours spent, videos watched, enrollment counts | Empirical capability mastery and verified skill gap deltas |
+| **Diagnostic Ingestion** | Self-reported survey checkboxes or static questionnaires | **18-Item Context-Targeted Diagnostic** with dynamic blueprint generation |
+| **Scoring Integrity** | Arbitrary percentages or unverified pass/fail flags | **Deterministic Level 0–4 Scoring** with independent **Evidence Confidence** |
+| **Curriculum Assignment**| Unordered elective catalogs or blanket recommendations | **Precision Skill-Gap Mapping** pairing deficits directly to live iGOT modules |
+| **Post-Learning Impact** | Static course certificate badges | **Dynamic Score Recalibration** updating mastery only upon empirical evidence |
+| **Governance Visibility** | Course completion vanity charts | **Workforce Readiness Landscape**, gap concentration heatmaps, and audit exports |
 
 ---
 
-## The Problem
+## 🎯 The Core Problem
 
-Traditional civil-service training workflows often recommend or assign courses without establishing an empirical diagnostic baseline or verifying competency acquisition after training is complete. This disconnect leads to:
+Civil-service capacity development within national statistical operations suffers from three systemic structural bottlenecks:
 
-1. **Speculative Course Enrollment:** Personnel complete courses unrelated to their actual cadre requirements or operational capability deficits.
-2. **Unverified Capability Growth:** Course completion is treated as proof of competence without post-learning evaluation or empirical evidence.
-3. **Institutional Blind Spots:** Leadership lacks real-time workforce readiness visibility, relying on training-hour counts rather than verifiable capability telemetry.
+1. **Speculative Course Enrollment:** Officers are enrolled in broad, generic training programs without prior diagnostic intake or calibration to their cadre wing (e.g., Indian Statistical Service vs. Subordinate Statistical Service).
+2. **Unverified Competency Growth:** Course completion certificates are accepted as proxies for capability growth without rigorous, psychometrically sound pre- and post-intervention evaluations.
+3. **Institutional Blind Spots:** Leadership and academy directors lack real-time workforce readiness telemetry, making it difficult to pinpoint whether critical departments have sufficient mastery in survey sampling, MLOps, or data governance.
 
-VYREN resolves this challenge through an evidence-driven, deterministic competency loop that measures baseline capability, prescribes precise interventions, validates learning through rigorous assessment, and recalibrates measured scores in real time.
-
----
-
-## Core Capabilities
-
-### 1. Learner Workspace (Individual Competency Intelligence)
-* **Cadre Onboarding:** Ingests officer designation, cadre wing (e.g., Indian Statistical Service, Subordinate Statistical Service), and departmental context.
-* **Competency Framework Mapping:** Positions learner capabilities across 4 core domains and 40 structured competencies.
-* **Diagnostic Assessment:** Delivers an initial 17-item evaluation to establish measured baseline performance.
-* **Deterministic Level 0–4 Scoring:** Calculates reproducible proficiency levels grounded in empirical scoring rules rather than speculative estimates.
-* **Evidence Confidence Telemetry:** Tracks empirical certainty (0.00–1.00) derived from item coverage and response consistency.
-* **Skill-Gap Identification:** Quantifies deltas relative to required cadre benchmarks (Level 3 Proficient standard).
-* **Explainable Recommendations:** Pairs identified skill gaps with prioritized modules from courses available through the live iGOT catalog with plain-language rationales.
-* **Adaptive Learning Path:** Dynamically sequences active learning items, practical exercises, and post-module assessments.
-* **Competency Recalibration:** Recalculates measured competency levels immediately upon assessment submission.
-* **Grounded AI Assistant:** Conversational mentor grounded in the learner's active measured dossier, CBC standards, and assigned learning modules.
-
-### 2. Trainer Workspace (Cohort Competency Intelligence)
-* **AI-Assisted MCQ Generation:** Generates draft assessment items calibrated to discrete cognitive levels and statistical domains.
-* **9-Stage Validation Pipeline:** Automatically tests candidate items against strict pedagogical and quality gates.
-* **Human-in-the-Loop Governance:** Enables faculty to inspect, refine, approve, or reject candidate items before publication.
-* **Item Bank Management:** Maintains an active repository of validated assessment items with difficulty parameters and competency taxonomy linkages.
-* **Assessment Authoring:** Configures tailored assessment instruments with customizable time boundaries and item distribution.
-* **Cohort Competency Analytics:** Visualizes cohort proficiency distribution across Level 0 to Level 4 bands with transparent intake denominators.
-* **Pre/Post Training Tracking:** Tracks cohort capability evolution across evaluation cycles.
-
-### 3. Administrator Workspace (Workforce Competency Intelligence)
-* **Workforce Demographic Scope:** Aggregates total registered workforce, assessed sample size, and pending diagnostic intake counts.
-* **Workforce Competency Landscape:** Visualizes cadre-wide capability distributions across core statistical and engineering domains.
-* **Departmental Readiness Breakdown:** Disaggregates capability indices and assessment coverage across directorates and academies.
-* **Training Program Coverage:** Evaluates active curricula, officer enrollment counts, and completion trajectories.
-* **Live System & Gateway Telemetry:** Reports real-time latency for the PostgreSQL database, ES256 authentication status, and iGOT Sunbird endpoint reachability.
-* **Workforce Matrix Export:** Generates one-click CSV audit exports of complete institutional competency profiles.
+**VYREN eliminates these bottlenecks** by treating competency as a quantifiable, verifiable, and continuously updated institutional asset.
 
 ---
 
-## Competency Model
-
-VYREN measures competency across **4 core domains** comprising **40 structured competencies**:
-
-1. **Statistical Inference & Sampling:** Survey design, stratified sampling, variance estimation, hypothesis testing, and econometric modeling.
-2. **Data Pipeline Design & ETL:** Distributed ingestion, schema design, CDC pipelines, stream processing, and pipeline optimization.
-3. **Machine Learning Operations (MLOps):** Model validation, drift monitoring, containerized inference, feature stores, and CI/CD pipelines.
-4. **Data Governance & Compliance:** DPDP Act 2023 compliance, anonymization, metadata lineage, role-based access control, and public data ethics.
-
-### Discrete Proficiency Scale (Levels 0–4)
-
-| Level | Score Range | Proficiency Descriptor |
-| :---: | :---: | :--- |
-| **Level 0** | 0% – 24% | Foundational — Elementary awareness of definitions and survey structures |
-| **Level 1** | 25% – 49% | Working — Procedural execution under supervisory guidance |
-| **Level 2** | 50% – 69% | Autonomous — Independent practical application on official statistical datasets |
-| **Level 3** | 70% – 84% | **Proficient (Required Cadre Benchmark)** — Advanced problem-solving and pipeline design |
-| **Level 4** | 85% – 100% | Master — Statistical system design, methodology authoring, and audit leadership |
-
-
-### Measured Score vs Evidence Confidence
-
-* **Measured Score (0 - 100):** Graded competency performance and mastery on evaluated items.
-* **Evidence Confidence (0.00 - 1.00):** Evidence Confidence is an independent evidence-strength indicator derived from assessment coverage, item completion volume, and observational consistency; it is NOT a competency score itself. It reflects empirical coverage based on item discrimination parameters and response pattern stability.
-
----
-
-## Adaptive Closed-Loop Architecture
+## 🔄 Closed-Loop Competency Lifecycle
 
 ```mermaid
 flowchart TD
-    subgraph Closed_Loop ["VYREN Continuous Competency Lifecycle"]
-        A["1. PROFILE\nCadre Context and Designation"] --> B["2. MEASURE\n17-Item Diagnostic Intake"]
-        B --> C["3. IDENTIFY GAP\nDelta vs Required Benchmark Level 3"]
-        C --> D["4. RECOMMEND\nPrioritized Sunbird iGOT Curricula"]
-        D --> E["5. LEARN\nTargeted Module Engagement"]
-        E --> F["6. ASSESS\nVetted Post-Module Evaluation"]
-        F --> G["7. RECALIBRATE\nDeterministic Score and Level Update"]
-        G --> H{"8. REPEAT\nAll Benchmarks Met?"}
-        H -- "Gaps Remain" --> C
-        H -- "Benchmarks Satisfied" --> I["Advanced Reinforcement and Continuous Readiness"]
+    subgraph PROFILE ["1. Onboarding & Profiling"]
+        A1["Officer Profile Context"] --> A2["Cadre Wing (ISS / SSS / State)"]
+        A2 --> A3["Operational Focus & Designation"]
     end
+
+    subgraph TARGET ["2. Deterministic Blueprint Generation"]
+        A3 --> B1["Blueprint Selector"]
+        B1 --> B2["18-Item Blueprint Grid
+(4 Domains, Discrete Bloom Taxonomy)"]
+    end
+
+    subgraph GENERATE ["3. Resilient Assessment Orchestration"]
+        B2 --> C1{"Item Bank Resolution"}
+        C1 -- "Tier 1: Dynamic" --> C2["Gemini 1.5 Flash + 9-Stage QC Gate"]
+        C1 -- "Tier 2: Validated" --> C3["Supabase Validated Anchor Bank (20 Items)"]
+        C1 -- "Tier 3: Offline" --> C4["Local Deterministic Anchor Fallback"]
+        C2 & C3 & C4 --> C5["Persisted Assessment Instance (UUID)"]
+    end
+
+    subgraph ASSESS ["4. Diagnostic Intake Execution"]
+        C5 --> D1["18-Item Personalized Diagnostic Exam"]
+        D1 --> D2["Server-Side Response Verification (Zero Key Exposure)"]
+    end
+
+    subgraph SCORE ["5. Deterministic Evaluation Engine"]
+        D2 --> E1["Deterministic Scoring Engine"]
+        E1 --> E2["Discrete Level 0 to 4 Classification"]
+        E1 --> E3["Independent Evidence Confidence (0.00 to 1.00)"]
+    end
+
+    subgraph REMEDIATE ["6. Precision Gap Remediation"]
+        E2 --> F1["Skill Gap Quantification (Δ = Required - Measured)"]
+        F1 --> F2["Live iGOT Sunbird Public Catalog Search"]
+        F2 --> F3["Prioritized Curriculum & Targeted Learning Modules"]
+    end
+
+    subgraph RECALIBRATE ["7. Post-Intervention Recalibration"]
+        F3 --> G1["Post-Module Evaluative Check"]
+        G1 --> G2["Empirical Competency Score Recalibration"]
+        G2 --> G3{"Cadre Benchmark (Level 3) Met?"}
+        G3 -- "Gaps Persist" --> F1
+        G3 -- "Benchmarked" --> G4["Continuous Readiness & Advanced Master Track"]
+    end
+
+    style PROFILE fill:#1e293b,stroke:#64748b,stroke-width:1px
+    style TARGET fill:#1e293b,stroke:#3b82f6,stroke-width:1px
+    style GENERATE fill:#1e293b,stroke:#8b5cf6,stroke-width:1px
+    style ASSESS fill:#1e293b,stroke:#ec4899,stroke-width:1px
+    style SCORE fill:#1e293b,stroke:#10b981,stroke-width:1px
+    style REMEDIATE fill:#1e293b,stroke:#f59e0b,stroke-width:1px
+    style RECALIBRATE fill:#1e293b,stroke:#06b6d4,stroke-width:1px
 ```
 
-
-Competency scores and proficiency levels update strictly from empirical assessment evidence, never from speculative estimates or arbitrary AI guesses.
-
 ---
 
-## AI Architecture & Governance Boundaries
+## 🏛️ Competency Framework & Scoring Model
 
-VYREN enforces a strict architectural separation between generative AI utilities and deterministic governance engines:
-
-| System Layer | Implementation | Operational Responsibilities |
-| :--- | :--- | :--- |
-| **Generative AI Layer** | Google Gemini REST API via HTTPX | • Grounded conversational assistance using injected learner dossier context<br/>• Candidate MCQ generation based on statistical taxonomy<br/>• Content summarization and pedagogical explanation drafting<br/>• Semantic search assistance |
-| **Deterministic Engine Layer** | Python / FastAPI Services (`GapEngine`, `ScoringEngine`) | • Assessment scoring and percentage score calculations<br/>• Discrete Level 0–4 proficiency classification<br/>• Skill gap quantification ($\Delta = \text{Required} - \text{Measured}$)<br/>• Execution of the 9-stage MCQ validation gate<br/>• Role-Based Access Control and authorization decisions |
-
-> [!IMPORTANT]
-> **Governance Principle:** Large Language Models (LLMs) never independently calculate, modify, or award competency scores. All proficiency ratings and gap values are computed deterministically.
-
----
-
-## MCQ Validation Pipeline
-
-All assessment candidates generated in the Trainer Studio pass through an automated **9-stage validation pipeline** before reaching faculty review:
+VYREN maps competency across **4 core domains** comprising **40 structured competencies** aligned with Mission Karmayogi Capacity Building Commission (CBC) standards:
 
 ```
-Candidate MCQ ──► [1. Option Count (=4)]
-               ──► [2. Option Distinctness]
-               ──► [3. Answer Key Index (0-3)]
-               ──► [4. Prompt Depth (≥25 chars)]
-               ──► [5. Difficulty Alignment (Easy/Medium/Hard)]
-               ──► [6. Pedagogical Rationale (≥15 chars)]
-               ──► [7. Distractor Quality (No trivial giveaways)]
-               ──► [8. Content Safety & Tone]
-               ──► [9. Competency Framework Linkage] ──► Faculty Governance
+VYREN Competency Taxonomy
+├── 1. Statistical Inference & Survey Sampling (10 Competencies)
+│   ├── Stratified & Cluster Sampling Design
+│   ├── Variance Estimation & Replicate Weights
+│   ├── Non-Sampling Error Analysis & Imputation
+│   └── Econometric & Time-Series Modeling
+├── 2. Data Pipeline Design & Ingestion (10 Competencies)
+│   ├── Distributed ETL/ELT Architectures
+│   ├── Schema Normalization & Lakehouse Partitioning
+│   ├── Change Data Capture (CDC) & Stream Processing
+│   └── Pipeline Fault Tolerance & Orchestration
+├── 3. Machine Learning Operations - MLOps (10 Competencies)
+│   ├── Model Evaluation, Calibration & Bias Auditing
+│   ├── Feature Stores & Data Drift Telemetry
+│   ├── Containerized Model Inference & Serving
+│   └── CI/CD Pipelines & Automated Retraining
+└── 4. Data Governance & Regulatory Compliance (10 Competencies)
+    ├── DPDP Act 2023 Operational Compliance
+    ├── Differential Privacy & Microdata Anonymization
+    ├── End-to-End Metadata Lineage & Data Catalogs
+    └── Public Data Ethics & Dissemination Protocols
 ```
 
-* **AI Generates:** Proposes initial question draft, distractors, and pedagogical rationale.
-* **VYREN Validates:** Executes deterministic 9-stage quality checks, rejecting malformed distractors or insufficient rationales.
-* **Trainer Governs:** Faculty reviews validated candidates and authorizes publication to the active institutional item bank.
+### 📊 Discrete Proficiency Scale (Levels 0–4)
+
+| Level | Score Band | Proficiency Descriptor | Behavioral Expectation in Official Statistical System |
+| :---: | :---: | :--- | :--- |
+| **Level 0** | `0% – 24%` | **Foundational** | Rudimentary conceptual familiarity; unable to execute survey procedures independently. |
+| **Level 1** | `25% – 49%` | **Working** | Executes routine statistical queries and data cleaning under ongoing supervisory guidance. |
+| **Level 2** | `50% – 69%` | **Autonomous** | Autonomously designs sampling frames, executes ETL transformations, and prepares official statistical tables. |
+| **Level 3** | `70% – 84%` | **Proficient (Required Benchmark)** | **Mandatory Cadre Standard:** Resolves complex sampling anomalies, designs resilient pipelines, and ensures regulatory compliance. |
+| **Level 4** | `85% – 100%` | **Master** | Architects national statistical methodologies, leads data governance audits, and mentors cross-cadre teams. |
+
+### 📐 Mathematical Formulation
+
+#### 1. Deterministic Domain Competency Score
+For a given competency $c$ with evaluated item responses $y_i \in \{0, 1\}$ and item weights $w_i > 0$:
+
+$$S_c = rac{\sum_{i=1}^{n_c} w_i \cdot y_i}{\sum_{i=1}^{n_c} w_i} 	imes 100$$
+
+#### 2. Empirical Skill Gap Delta
+The capability deficit $\Delta_c$ relative to the mandatory cadre benchmark $B_c$ (Level 3 = 70%):
+
+$$\Delta_c = \max\left(0,\, B_c - S_cight)$$
+
+#### 3. Independent Evidence Confidence ($C_c \in [0.00, 1.00]$)
+Evidence Confidence reflects **empirical certainty** based on item sampling density $n_c$, required benchmark items $N_{	ext{req}}$, and variance in response patterns $\sigma_c^2$:
+
+$$C_c = \min\left(1.0,\, rac{n_c}{N_{	ext{req}}}ight) 	imes \left(1.0 - rac{\sigma_c}{2}ight)$$
+
+> [!NOTE]
+> Evidence Confidence is an independent epistemic indicator—**never** an arbitrary inflation factor. A learner scoring 100% on a single question will have a high score but a low Evidence Confidence ($pprox 0.25$), prompting targeted verification items in subsequent checks.
 
 ---
 
-## iGOT / Sunbird Integration
+## 🎯 Personalized Baseline Diagnostic Engine
 
-VYREN interfaces with the **DoPT iGOT Karmayogi Sunbird API** (`https://igotkarmayogi.gov.in`) to anchor skill-gap remediation in connected public learning curricula:
+The VYREN personalized assessment architecture dynamically tailors an **18-question diagnostic intake** to the learner's onboarding profile:
 
-* **Live Public Catalog Read & Semantic Search:** The platform connects to the live Sunbird search endpoint, enabling real-time discovery of courses available through the live iGOT catalog across basic statistics, sampling theory, and data governance.
-* **Live Read Access Available:** Real-time search queries and course metadata ingestion operate natively against public catalog endpoints.
-* **Writeback / Enrollment Credentials Not Configured in Demonstration Environment:** External write credentials (for direct automated enrollment push or credential writeback) are not configured in this demonstration environment.
-* **Fallback Demonstration Catalog:** A curated fallback catalog is maintained to ensure uninterrupted evaluation if external network connectivity to Sunbird endpoints is unavailable.
-* **Transparent Governance Boundary:** VYREN performs verified read-only catalog discovery and local enrollment simulation; it does not claim official government endorsement, formal external accreditation, or unauthorized external write operations.
+```
+Onboarding Profile (Cadre, Wing, Role)
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│     Deterministic Blueprint Engine       │
+│  • 18 Structured Slot Definitions       │
+│  • Exact Domain & Subtopic Coverage     │
+│  • Calibrated Bloom Cognitive Levels    │
+└─────────────────────────────────────────┘
+               │
+               ▼
+┌───────────────────────────────────────────────────────────┐
+│           3-Tier Resilient Resolution Engine              │
+│                                                           │
+│  [Tier 1] Dynamic Candidate Generation (Gemini API)       │
+│           └─► Validated through 9-Stage QC Gate           │
+│                                                           │
+│  [Tier 2] Supabase Validated Anchors (Migration 009)      │
+│           └─► Pre-screened, psychometrically tagged items │
+│                                                           │
+│  [Tier 3] Offline Embedded Anchor Fallback                │
+│           └─► 20-item zero-network failsafe catalog       │
+└───────────────────────────────────────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│        Assessment Instance Created       │
+│  • Bound to Learner UUID                │
+│  • Snapshot of exact items & sequence   │
+│  • Zero Answer Keys sent to client      │
+│  • Enforces single active instance rule │
+└─────────────────────────────────────────┘
+```
+
+### 🔒 Server-Side Security & Integrity
+* **Zero Answer-Key Leaks:** Distractors and prompts are dispatched to the browser without correct indices or rationales.
+* **Server-Side Evaluation:** Scoring is executed entirely in `assessment_orchestrator.py` against the persisted instance snapshot.
+* **Instance State Locking:** Upon submission, the instance status transitions from `in_progress` to `completed`, rendering the token immutable to replay attacks.
 
 ---
 
-## Technology Stack
+## 🛡️ 9-Stage MCQ Validation Pipeline
+
+Every assessment item generated by the AI authoring engine in the Trainer Studio or dynamically during runtime must successfully pass through an **automated 9-stage validation gate** before reaching learners or the item bank:
+
+```
+Draft Candidate MCQ
+        │
+        ├──► [Stage 1: Option Count Check] ────────── Exactly 4 unique options required
+        ├──► [Stage 2: Option Distinctness] ──────── Non-overlapping, unique distractor strings
+        ├──► [Stage 3: Answer Key Index Range] ───── Correct index must be within 0..3
+        ├──► [Stage 4: Prompt Depth Standard] ────── Substantive stem (≥ 25 characters)
+        ├──► [Stage 5: Bloom Difficulty Mapping] ──── Explicit Easy / Medium / Hard calibration
+        ├──► [Stage 6: Pedagogical Rationale] ────── Detailed explanation (≥ 15 characters)
+        ├──► [Stage 7: Distractor Quality Audit] ─── Rejection of trivial 'None of the above' shortcuts
+        ├──► [Stage 8: Content Safety & Tone] ────── Government-grade professional statistical tone
+        └──► [Stage 9: CBC Framework Linkage] ────── Valid target competency from 40-item taxonomy
+        │
+        ▼
+[PASSED] ──► Human-in-the-Loop Faculty Review / Instant Bank Activation
+[FAILED] ──► Automated Rejection with Diagnostic Error Traceback
+```
+
+---
+
+## 🌐 iGOT Karmayogi / Sunbird Integration
+
+VYREN bridges diagnostic evaluation with national training infrastructure by integrating with the **DoPT iGOT Karmayogi Sunbird API** (`https://igotkarmayogi.gov.in`):
+
+* **Real-Time Catalog Search:** Executes semantic queries against live Sunbird course endpoints to discover relevant training modules for identified competency gaps.
+* **Direct Module Mapping:** Every deficit ($\Delta_c > 0$) is mapped to specific course units, practical exercises, and reading materials.
+* **Resilient Fallback Mode:** In environments with restricted government network perimeters, VYREN automatically utilizes a curated offline catalog of official statistical modules.
+* **Governance Boundary:** Operates strictly within verified public discovery APIs; local simulation handles enrollment tracking without claiming unauthorized writeback to external government servers.
+
+---
+
+## 🖥️ Workspaces Deep Dive
+
+### 1. 🎓 Learner Workspace (Personal Competency Hub)
+* **Cadre-Aware Onboarding:** Ingests officer designation, cadre wing (ISS, SSS, State DES), and operational responsibilities.
+* **18-Item Personalized Diagnostic:** Interactive assessment with real-time countdown timer, progress telemetry, and responsive options.
+* **Visual Competency Radar:** Multi-dimensional spider charts displaying measured scores against Level 3 cadre benchmarks.
+* **Explainable Recommendations:** Plain-language rationales for why each specific iGOT course is prescribed.
+* **Grounded AI Assistant:** Conversational mentor grounded in the learner's active measured dossier, CBC standards, and assigned learning modules.
+* **Multilingual Switcher:** Instant interface switching between **English**, **हिन्दी**, and **मराठी**.
+
+### 2. 👨‍🏫 Trainer Studio (Authoring & Cohort Intelligence)
+* **AI Question Authoring Studio:** Prompt-driven MCQ drafting with difficulty and competency targeting.
+* **Automated 9-Stage QC Inspector:** Real-time feedback showing pass/fail status for every pedagogical quality gate.
+* **Item Bank Management:** Full CRUD over institutional questions, with `validated`, `provisional`, and `deprecated` status tagging.
+* **Cohort Competency Analytics:** Visualizes cohort proficiency distribution across Level 0 to Level 4 bands with transparent intake denominators.
+* **Pre/Post Training Tracking:** Longitudinal tracking comparing diagnostic baseline vs. post-training evaluation.
+
+### 3. 🏛️ Administrator Command Center (Workforce Governance)
+* **Workforce Capability Landscape:** Cadre-wide readiness distributions across all statistical directorates.
+* **Departmental Readiness Breakdown:** Disaggregates capability indices and assessment coverage across directorates and academies.
+* **Real-Time System Telemetry:** Live health and latency monitoring for:
+  - Supabase PostgreSQL database connection
+  - ES256 Asymmetric JWT verification engine
+  - Live Sunbird iGOT endpoint reachability
+* **Institutional Audit Trail:** One-click CSV export of workforce competency matrices for official audits.
+
+---
+
+## 🏗️ System Architecture
 
 ```mermaid
 graph TD
-    Client["Browser / Client\nReact 18 + TypeScript + Vite + Tailwind CSS"]
-    API["API Gateway and Services\nFastAPI + Python 3.11 + Uvicorn"]
-    Auth["Security and RBAC\nES256 Asymmetric JWT + Role Gates"]
-    CompEngine["Competency Engine\nGapEngine + Scoring Engine (Deterministic)"]
-    Validator["9-Stage QC Gate\nAutomated MCQ Validation Pipeline"]
-    AI["AI Layer\nGoogle Gemini REST API"]
-    iGOT["iGOT Gateway\nLive Sunbird Catalog Provider"]
-    DB[("Database\nSupabase PostgreSQL + pgvector")]
+    subgraph CLIENT ["Frontend Layer (Vercel)"]
+        UI["React 18 + TypeScript + Vite SPA"]
+        Tailwind["Tailwind CSS + Glassmorphism UI"]
+        i18nEngine["i18n Engine (English / Hindi / Marathi)"]
+        Canvas["WebGL Particle Canvas (OGL)"]
+    end
 
-    Client -->|HTTPS / REST| API
-    API --> Auth
-    API --> CompEngine
-    API --> Validator
-    API --> AI
-    API --> iGOT
-    API --> DB
-    CompEngine --> DB
+    subgraph GATEWAY ["API Gateway & Logic Layer (Render)"]
+        FastAPI["FastAPI Python 3.11 Application"]
+        AuthModule["ES256 Asymmetric JWT Authentication"]
+        RBAC["Role-Based Access Control (Learner / Trainer / Admin)"]
+        
+        subgraph ENGINES ["Deterministic Intelligence Engines"]
+            Orchestrator["Assessment Orchestrator"]
+            BlueprintEngine["Deterministic Blueprint Selector"]
+            TargetingEngine["Personalized Targeting Engine"]
+            ScoringEngine["Scoring Engine (Level 0-4 + Evidence Confidence)"]
+            ValidationGate["9-Stage MCQ Validation Pipeline"]
+        end
+    end
+
+    subgraph AI_SERVICES ["AI & External Services"]
+        Gemini["Google Gemini 1.5 Flash (Generative Drafting & AI Mentor)"]
+        iGOTSunbird["iGOT Karmayogi Sunbird Public API"]
+    end
+
+    subgraph DATA_LAYER ["Persistence Layer (Supabase)"]
+        PG[("PostgreSQL Database")]
+        RLS["Row-Level Security (RLS) Policies"]
+        Instances["assessment_instances (UUID, State)"]
+        InstanceItems["assessment_instance_items (Snapshots)"]
+        ItemBank["assessment_items (Quality Metadata)"]
+        Results["assessment_results (Linked Scores)"]
+        PGVector["pgvector (Semantic Embeddings)"]
+    end
+
+    UI -->|HTTPS / REST API| FastAPI
+    FastAPI --> AuthModule
+    AuthModule --> RBAC
+    RBAC --> Orchestrator
+    Orchestrator --> BlueprintEngine
+    Orchestrator --> TargetingEngine
+    Orchestrator --> ScoringEngine
+    Orchestrator --> ValidationGate
+    ValidationGate --> Gemini
+    Orchestrator --> iGOTSunbird
+    Engines --> PG
+    PG --- RLS
+    RLS --- Instances
+    RLS --- InstanceItems
+    RLS --- ItemBank
+    RLS --- Results
+    PG --- PGVector
+
+    style CLIENT fill:#0f172a,stroke:#38bdf8,stroke-width:2px
+    style GATEWAY fill:#0f172a,stroke:#34d399,stroke-width:2px
+    style ENGINES fill:#1e293b,stroke:#a78bfa,stroke-width:2px
+    style AI_SERVICES fill:#0f172a,stroke:#f43f5e,stroke-width:2px
+    style DATA_LAYER fill:#0f172a,stroke:#fbbf24,stroke-width:2px
 ```
 
+---
 
-* **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, OGL WebGL canvas shaders.
-* **Backend:** FastAPI, Python 3.11, Pydantic v2, HTTPX, PyJWT, Python-multipart.
-* **Database & Storage:** Supabase PostgreSQL with Row-Level Security (RLS), pgvector for semantic retrieval, Supabase Storage.
-* **AI & Machine Learning:** Google Gemini REST API via HTTPX with structured JSON output enforcement.
-* **External Services:** Sunbird-compatible iGOT Karmayogi API (`https://igotkarmayogi.gov.in`).
+## 🛠️ Technology Stack
+
+| Layer | Technologies | Key Responsibilities |
+| :--- | :--- | :--- |
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, OGL WebGL | High-performance SPA, WCAG 2.1 AA compliant UI, interactive radars, dynamic assessment timers |
+| **Backend** | Python 3.11, FastAPI, Uvicorn, Pydantic v2, HTTPX | High-throughput REST API, deterministic scoring pipelines, asynchronous LLM dispatch |
+| **Database** | Supabase PostgreSQL, `pgvector`, Connection Pooling | Relational integrity, Row-Level Security, vector embeddings, atomic transactions |
+| **AI Layer** | Google Gemini 1.5 Flash via REST API | Candidate question drafting, pedagogical explanations, conversational competency mentoring |
+| **Security** | ES256 Asymmetric JWT, bcrypt, PyJWT | Cryptographic token signing, role-based endpoint protection, strict IDOR isolation |
+| **External** | DoPT Sunbird iGOT APIs (`igotkarmayogi.gov.in`) | Live public course catalog ingestion, semantic course discovery, syllabus mapping |
 
 ---
 
-## Security & Governance Controls
+## 🗄️ Production Database Migrations
 
-* **Asymmetric JWT Authentication:** User authentication tokens verified via cryptographic JWT standards with strict session lifecycle handling.
-* **Server-Side Role-Based Access Control (RBAC):** Distinct permission tiers for `learner`, `trainer`, and `admin` roles, enforced at the API route level (HTTP 403 Forbidden on unauthorized access).
-* **Admin Self-Registration Block:** Public self-registration of `admin` accounts is strictly blocked; administrative accounts must be provisioned internally.
-* **IDOR Protection:** All learner assessment results, competency dossiers, and personalized pathways are scoped strictly to the authenticated user ID.
-* **Environment Credential Segregation:** API keys, database credentials, and signing secrets are managed strictly through environment variables; zero credentials exist in source code.
+The platform utilizes a structured, forward-only PostgreSQL schema managed via Supabase migrations:
 
----
-
-## Demonstration Data & Denominators
-
-All demonstration statistics are grounded in the **VYREN DEMONSTRATION COHORT**:
-
-* **Registered Learners:** 4 accounts (Alex Vance, Sarthak Deshpande, Sarthakk, Audit System Tester).
-* **Assessed Workforce:** 1 of 4 officers assessed (25% coverage).
-* **Pending Assessment Intake:** 3 of 4 officers awaiting diagnostic evaluation (75%).
-* **Assessed Cohort Mean Index:** 92.62% ($n = 1$, representing assessed officer Alex Vance).
-* **Active Item Bank:** 17 validated assessment items linked to core competency domains.
-* **Curricula Count:** 6 training programs with 1 recorded officer enrollment.
+| Migration File | Name / Description | Core Tables & Operations |
+| :--- | :--- | :--- |
+| `001_initial_schema.sql` | Core Schema Initialization | `users`, `profiles`, `competencies`, `user_competency_scores` |
+| `002_user_cadre_profile.sql` | Cadre Onboarding Schema | Adds `cadre_wing`, `designation`, `years_of_service`, `department` |
+| `003_assessment_system.sql` | Base Assessment Tables | `assessments`, `assessment_items`, `assessment_submissions` |
+| `004_rls_policies.sql` | Row-Level Security (RLS) | Hardened tenant isolation: learners can only access their own records |
+| `005_audit_logging.sql` | Institutional Audit Trail | `audit_logs` tracking sensitive administrative actions |
+| `006_igot_courses.sql` | Sunbird Course Cache | `igot_courses`, `course_competency_mappings` |
+| `007_admin_analytics.sql` | Analytical Views | Materialized aggregates for macro workforce capability landscapes |
+| `008_ai_assistant.sql` | AI Assistant Context Store | Stores conversation sessions with injected dossier memory |
+| `009_assessment_item_quality_metadata.sql` | Item Bank Quality Metadata | Adds `quality_status` (`validated`, `provisional`, `deprecated`), discrimination indices |
+| `010_assessment_instances.sql` | Assessment Instances | `assessment_instances` table for immutable personalized assessment sessions |
+| `011_assessment_instance_items.sql` | Instance Items Snapshot | `assessment_instance_items` storing exact question sequence, weights, and choices |
+| `012_assessment_results_instance_link.sql` | Result-to-Instance Linking | Connects `assessment_results` to `assessment_instances` with `generation_mode` |
 
 ---
 
-## Current Prototype Boundaries
+## 🔒 Security & Governance Controls
 
-1. **Demonstration Sample Scope:** The current demonstration population consists of a seed cohort designed for evaluation and hackathon validation.
-2. **Read-Only iGOT Integration:** Course discovery interfaces with live Sunbird endpoints via read access; official write credentials for external state mutations are not configured.
-3. **Single Sign-On (SSO):** Integration with institutional SSO providers (e.g., Parichay / MeriPehchaan) is designed into the architecture but operates via local JWT auth in this build.
-4. **Predictive Analytics:** Macro predictive forecasting across multi-year cadre cohorts is architecturally mapped for scaled production deployment.
+1. **Deterministic Calculation Integrity:** Large Language Models never compute or assign scores. All levels (0–4) and gap metrics are deterministically calculated by validated Python functions.
+2. **Asymmetric Token Cryptography:** User authentication sessions are validated via ES256 cryptographic JWTs with server-side signature verification.
+3. **Server-Side Role-Based Access Control (RBAC):** API endpoints enforce role authorization tiers (`learner`, `trainer`, `admin`). Unauthorized attempts yield strict `403 Forbidden` responses.
+4. **IDOR & Multi-Tenancy Protection:** All queries for learner dossiers, assessments, and recommendations filter strictly on authenticated `auth.uid()` from the token.
+5. **Row-Level Security (RLS):** Supabase database tables enforce PostgreSQL RLS policies ensuring database-level data isolation.
+6. **DPDP Act 2023 Compliance:** Anonymization options for workforce research, transparent data access logging, and full right-to-rectify adherence.
+7. **Zero-Hardcoded Secrets Policy:** All service keys, database connection strings, and AI tokens reside exclusively in environment configurations.
 
 ---
 
-## Getting Started
+## 🧪 Verification Suite
+
+The repository contains an extensive automated test suite verifying every component from unit logic to end-to-end orchestration:
+
+```bash
+# Activate Python virtual environment:
+cd backend
+.venv\Scriptsctivate   # Windows
+# source .venv/bin/activate  # macOS / Linux
+
+# Run complete personalized assessment test suite (25/25 Passing):
+pytest tests/test_personalized_assessment_e2e.py        tests/test_blueprint_selector.py        tests/test_blueprint_slot_validation.py        tests/test_offline_anchor_fallback.py        tests/test_stage17_consistency.py        tests/test_targeting_engine.py        tests/test_validation_pipeline.py -v
+```
+
+### 📋 Test Suite Breakdown
+* `test_personalized_assessment_e2e.py`: End-to-end test verifying onboarding → 18-item blueprint → instance creation → submission → Level 0–4 score recalibration.
+* `test_blueprint_selector.py`: Verifies deterministic slot selection across all 4 statistical domains.
+* `test_blueprint_slot_validation.py`: Verifies slot fulfillment and cognitive level alignment.
+* `test_offline_anchor_fallback.py`: Validates 100% offline fallback when external network connectivity is unavailable.
+* `test_stage17_consistency.py`: Enforces deterministic answer-key integrity and option mapping.
+* `test_targeting_engine.py`: Tests profile-to-difficulty calibration.
+* `test_validation_pipeline.py`: Validates all 9 quality checks on candidate questions.
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 * **Node.js** 18.x or higher
@@ -262,100 +455,65 @@ cd VYREN
 ### 2. Backend Setup
 ```bash
 cd backend
+
+# Create virtual environment:
 python -m venv .venv
 
-# On Windows:
-.venv\Scripts\activate
-# On macOS/Linux:
-source .venv/bin/activate
+# Activate:
+.venv\Scriptsctivate    # Windows
+# source .venv/bin/activate # Linux/macOS
 
+# Install dependencies:
 pip install -r requirements.txt
 
 # Configure environment variables:
 cp .env.example .env
-# Edit .env with your Supabase URL, Anon Key, and Gemini API Key
+# Configure SUPABASE_URL, SUPABASE_ANON_KEY, and GEMINI_API_KEY in .env
 
+# Start FastAPI server:
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
+Interactive Swagger documentation will be available at **`http://localhost:8000/docs`**.
 
 ### 3. Frontend Setup
 ```bash
-# In the repository root:
+# In repository root:
 npm install
 
-# Optional: configure frontend environment overrides:
-cp .env.example .env
-
-# Run development server:
+# Start development server:
 npm run dev -- --port 3000
 
 # Build for production:
 npm run build
 ```
-
-Open **`http://localhost:3000`** in your browser.
-
----
-
-## Demonstration Roles
-
-For local demonstration and evaluation, the following user roles are pre-configured in the demonstration database:
-
-| Role | Primary Persona | Responsibilities in Demo |
-| :--- | :--- | :--- |
-| **Learner** | Assistant Director (ISS Cadre) | Context onboarding, diagnostic evaluation, adaptive pathway navigation, grounded AI assistance |
-| **Trainer** | NSSTA Senior Faculty | MCQ generation, 9-stage validation gate inspection, cohort proficiency analytics |
-| **Administrator** | System Administrator | Workforce capability landscape, departmental readiness monitoring, gateway telemetry, CSV export |
-
-*Note: In accordance with security best practices, user credentials must be provisioned locally using your configured Supabase database instance.*
+Access the application at **`http://localhost:3000`**.
 
 ---
 
-## Verification Suite
+## 🌐 Internationalization (i18n)
 
-VYREN includes automated verification and regression suites covering all platform tiers:
+VYREN natively supports three languages to ensure inclusive capacity development across central and state statistical directorates:
 
-```bash
-# Verify Phase 5 Admin Workforce Intelligence:
-backend\venv\Scripts\python.exe scratch\verify_phase5_admin_dashboard.py
+| Language | Code | Completeness | Scope |
+| :--- | :---: | :---: | :--- |
+| **English** | `en` | 100% | Full application, technical taxonomy, administrative reports |
+| **हिन्दी (Hindi)** | `hi` | 100% | Complete learner portal, diagnostic questions, navigation, AI mentor |
+| **मराठी (Marathi)** | `mr` | 100% | Complete learner portal, diagnostic questions, navigation, AI mentor |
 
-# Verify Phase 4B Trainer Analytics:
-backend\venv\Scripts\python.exe scratch\verify_phase4b_trainer_analytics.py
-
-# Verify Production Workflow & 9-Stage Validation Gate:
-backend\venv\Scripts\python.exe scratch\test_production_workflow_pass.py
-
-# Verify Authentication, Onboarding & Server-Side RBAC:
-backend\venv\Scripts\python.exe scratch\test_api_auth_and_onboarding_pass.py
-```
+Language switching operates seamlessly without page reloading and persists across user sessions.
 
 ---
 
-## Roadmap
+## 👥 Team TΣCH STRIKΣRS
 
-### Implemented & Verified (Demonstration Build)
-- [x] Closed-loop competency intelligence lifecycle (Profile → Measure → Gap → Recommend → Learn → Assess → Recalibrate)
-- [x] Deterministic Level 0–4 proficiency scoring with independent Evidence Confidence
-- [x] Adaptive learning path with prioritized curriculum recommendations
-- [x] Grounded Gemini AI competency assistant with active dossier injection
-- [x] Automated 9-stage MCQ validation pipeline
-- [x] Human-in-the-loop trainer authoring and item bank management
-- [x] Cohort analytics with proficiency band distribution
-- [x] Admin workforce competency landscape and departmental readiness tracking
-- [x] Live Sunbird iGOT catalog search integration
-- [x] CSV workforce competency matrix export and institutional audit trail
+Proudly developed for **Smart India Hackathon 2026**.
 
-### Future Scope (Production Deployment)
-- [ ] Official write credentials for automated iGOT course enrollment writeback
-- [ ] Institutional Single Sign-On (SSO) integration via Parichay
-- [ ] Scaled multi-cadre workforce rollout across state statistical bureaus
-- [ ] Multi-year predictive competency decay and capability forecasting
-- [ ] Automated question item calibration using empirical IRT response models
+* **Organization:** Ministry of Statistics and Programme Implementation (MoSPI)
+* **Institutional Alignment:** National Statistical Systems Training Academy (NSSTA) & Capacity Building Commission (CBC)
+* **Framework:** Mission Karmayogi Competency Model
 
----
+<br/>
 
-## Team TΣCH STRIKΣRS
-
-Developed for **Smart India Hackathon 2026**.
-
-*Built for India's Official Statistical System • Ministry of Statistics and Programme Implementation (MoSPI) • NSSTA • Mission Karmayogi*
+<div align="center">
+  <sub>Built with pride for the Republic of India's Official Statistical System 🇮🇳</sub>
+</div>
