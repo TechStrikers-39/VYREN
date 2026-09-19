@@ -6,7 +6,7 @@
 
 ---
 
-[![Smart India Hackathon 2026](https://img.shields.io/badge/SIH-2026%20Finalist-FF6F00?style=for-the-badge&logo=target&logoColor=white)](https://sih.gov.in)
+[![Smart India Hackathon 2026](https://img.shields.io/badge/SIH-2026-FF6F00?style=for-the-badge&logo=target&logoColor=white)](https://sih.gov.in)
 [![Ministry](https://img.shields.io/badge/MoSPI-Official%20Statistical%20System-003366?style=for-the-badge&logo=gov.uk&logoColor=white)](https://mospi.gov.in)
 [![Academy](https://img.shields.io/badge/NSSTA-Statistical%20Academy-1B3A6B?style=for-the-badge)](https://nssta.gov.in)
 [![Capacity Building](https://img.shields.io/badge/Mission%20Karmayogi-CBC%20Aligned-16A34A?style=for-the-badge&logo=checkmarx&logoColor=white)](https://karmayogibharat.gov.in)
