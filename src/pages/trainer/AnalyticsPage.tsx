@@ -369,7 +369,7 @@ export const TrainerAnalyticsPage: React.FC = () => {
                 Assigned Track: Indian Statistical Service (ISS) & Subordinate Statistical Service (SSS)
               </div>
               <div className="text-text-secondary text-[11px]">
-                Active Instrument: <strong>VYREN Competency Baseline Assessment (asm-001)</strong> &bull; 17-Item Competency Assessment &bull; 20 Min Standard Limit
+                Active Instrument: <strong>VYREN Competency Baseline Assessment (asm-001)</strong> &bull; 18-Item Competency Assessment &bull; 20 Min Standard Limit
               </div>
             </div>
           </div>

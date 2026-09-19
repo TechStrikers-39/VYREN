@@ -1,4 +1,7 @@
+import json
+import logging
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from app.repositories.competency_repo import CompetencyRepository
@@ -7,9 +10,92 @@ from app.services.gap_engine import GapEngine
 from app.services.scoring_engine import ScoringEngine
 from app.utils.supabase_client import get_supabase
 
+logger = logging.getLogger(__name__)
+
 
 class AssessmentRepository:
     DEFAULT_ASSESSMENT_ID = "a1000000-0000-0000-0000-000000000001"
+
+    DEPRECATED_ITEM_IDS = {
+        "551a72fc-d340-4779-b420-1c5e74dd09ef",
+        "6c50190f-81df-4359-8ff4-ef771a384769",
+        "62d3647b-987b-4a47-9f54-69f65610af20",
+        "32506f3c-fc9e-4218-a526-66b077b1196a",  # Duplicate of c3d83ced
+    }
+
+    @classmethod
+    def load_offline_anchors(cls) -> List[dict]:
+        """
+        Loads the 20 verified baseline anchor items from local static storage.
+        Fallback only: used when Supabase is unreachable.
+        """
+        try:
+            data_path = Path(__file__).resolve().parent.parent / "data" / "baseline_anchors.json"
+            if data_path.exists():
+                with open(data_path, "r", encoding="utf-8") as f:
+                    return json.load(f)
+        except Exception as e:
+            logger.error(f"[AssessmentRepo] Failed loading offline anchors: {e}")
+        return []
+
+    @classmethod
+    def _legacy_filter_clean_anchors(cls, raw_items: List[dict]) -> List[dict]:
+        """
+        Isolated compatibility filter used prior to Migration 009 execution.
+        Filters out known test artifacts and duplicates from raw assessment_items.
+        """
+        return [
+            it for it in raw_items
+            if str(it.get("id")) not in cls.DEPRECATED_ITEM_IDS
+            and "automated audit verification" not in (it.get("prompt") or "").lower()
+        ]
+
+    @classmethod
+    def get_validated_anchors(cls) -> List[dict]:
+        """
+        Retrieves clean, validated baseline anchor items with graceful compatibility.
+        
+        Three-tier priority:
+        1. Migration 009 metadata: query `quality_status = 'validated'`
+        2. Legacy compatibility: query all items and filter via isolated `_legacy_filter_clean_anchors`
+        3. Offline verified anchor fallback: load from local JSON if Supabase is unreachable
+        """
+        # Tier 1: Try authoritative query using Migration 009 quality metadata
+        try:
+            supabase = get_supabase()
+            res = (
+                supabase.table("assessment_items")
+                .select("*")
+                .eq("quality_status", "validated")
+                .order("order_index")
+                .execute()
+            )
+            if res.data and len(res.data) >= 18:
+                logger.info(f"[AssessmentRepo] Loaded {len(res.data)} anchors via Migration 009 quality metadata.")
+                return res.data
+        except Exception as meta_err:
+            logger.info(f"[AssessmentRepo] Migration 009 quality metadata query skipped ({meta_err}). Proceeding to compatibility filter.")
+
+        # Tier 2: Pre-migration legacy compatibility query
+        try:
+            supabase = get_supabase()
+            res = (
+                supabase.table("assessment_items")
+                .select("*")
+                .order("order_index")
+                .execute()
+            )
+            raw_items = res.data or []
+            clean_items = cls._legacy_filter_clean_anchors(raw_items)
+            if len(clean_items) >= 18:
+                logger.info(f"[AssessmentRepo] Loaded {len(clean_items)} anchors via legacy compatibility filter.")
+                return clean_items
+        except Exception as db_err:
+            logger.warning(f"[AssessmentRepo] Supabase database query failed ({db_err}). Falling back to offline anchors.")
+
+        # Tier 3: Offline static verified anchor fallback
+        logger.warning("[AssessmentRepo] Using offline verified anchor fallback.")
+        return cls.load_offline_anchors()
 
     @classmethod
     def _normalize_id(cls, aid: str) -> str:
@@ -74,21 +160,28 @@ class AssessmentRepository:
         answers_dict: Dict[str, int],
     ) -> dict:
         supabase = get_supabase()
-        normalized_id = cls._normalize_id(assessment_id)
 
-        # 1. Fetch assessment metadata & raw items with correct_index
-        assessment_res = (
-            supabase.table("assessments")
-            .select("id, version")
-            .eq("id", normalized_id)
-            .single()
-            .execute()
-        )
-        if not assessment_res.data:
-            raise ValueError(f"Assessment '{assessment_id}' not found.")
+        # 1. Check if assessment_id is a personalized AssessmentInstance
+        from app.repositories.instance_repo import AssessmentInstanceRepository
+        instance = AssessmentInstanceRepository.get_instance(assessment_id)
 
-        assessment_version = assessment_res.data.get("version", "1.0")
-        raw_items = AssessmentRepository.get_raw_assessment_items(assessment_id)
+        if instance:
+            raw_items = AssessmentInstanceRepository.get_raw_instance_items_for_scoring(assessment_id)
+            normalized_id = instance.get("template_assessment_id") or cls.DEFAULT_ASSESSMENT_ID
+            assessment_version = "2.0-personalized"
+        else:
+            normalized_id = cls._normalize_id(assessment_id)
+            assessment_res = (
+                supabase.table("assessments")
+                .select("id, version")
+                .eq("id", normalized_id)
+                .single()
+                .execute()
+            )
+            if not assessment_res.data:
+                raise ValueError(f"Assessment '{assessment_id}' not found.")
+            assessment_version = assessment_res.data.get("version", "1.0")
+            raw_items = AssessmentRepository.get_raw_assessment_items(assessment_id)
 
         # 2. Run Deterministic Scoring Engine
         scoring_res = ScoringEngine.evaluate_submission(raw_items, answers_dict)
@@ -185,7 +278,6 @@ class AssessmentRepository:
         # 7. Store Result Record with Full Evidence Vector
         result_payload = {
             "user_id": user_id,
-
             "assessment_id": normalized_id,
             "assessment_version": assessment_version,
             "overall_score": overall_score,
@@ -195,12 +287,30 @@ class AssessmentRepository:
             "submitted_at": now_iso,
         }
 
-        insert_res = (
-            supabase.table("assessment_results")
-            .insert(result_payload)
-            .execute()
-        )
-        return insert_res.data[0] if insert_res.data else result_payload
+        saved_result = None
+        if instance:
+            try:
+                extended = dict(result_payload, instance_id=instance["id"], generation_mode=instance.get("generation_mode", "ai_personalized"))
+                r = supabase.table("assessment_results").insert(extended).execute()
+                if r.data:
+                    saved_result = r.data[0]
+            except Exception:
+                pass
+
+        if not saved_result:
+            insert_res = (
+                supabase.table("assessment_results")
+                .insert(result_payload)
+                .execute()
+            )
+            saved_result = insert_res.data[0] if insert_res.data else result_payload
+
+        # Mark instance submitted if applicable
+        if instance:
+            res_id = saved_result.get("id") or str(uuid.uuid4())
+            AssessmentInstanceRepository.mark_instance_submitted(assessment_id, result_id=res_id)
+
+        return saved_result
 
     @staticmethod
     def get_result(result_id: str, user_id: str) -> dict | None:

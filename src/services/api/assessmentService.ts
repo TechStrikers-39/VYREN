@@ -16,6 +16,8 @@ export const assessmentService = {
         description: res.description,
         durationMinutes: res.time_limit_minutes,
         questionsCount: res.items?.length || 0,
+        generationMode: res.generation_mode,
+        blueprint: res.blueprint,
         competenciesEvaluated: ['Statistical Inference', 'Data Pipeline Design', 'MLOps', 'Data Governance'],
         items: (res.items || []).map((it: any) => ({
           id: it.id,
@@ -23,6 +25,8 @@ export const assessmentService = {
           options: it.options,
           weight: it.weight,
           difficulty: it.difficulty,
+          itemSource: it.item_source,
+          questionType: it.question_type,
           targetCompetency: it.competency_id,
         })),
       };

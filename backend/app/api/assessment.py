@@ -23,7 +23,36 @@ async def get_assessment(
     """
     Fetch assessment definition and list of MCQ items.
     SECURITY: `correct_index` is omitted from the response.
+    Orchestrates personalized baseline assessments (18 items) based on learner onboarding context.
     """
+    from app.services.assessment_orchestrator import AssessmentOrchestrationService
+    from app.repositories.instance_repo import AssessmentInstanceRepository
+
+    user_id = current_user["id"]
+
+    # 1. Baseline assessment request: orchestrate personalized 18-question diagnostic
+    if assessment_id in ("a1000000-0000-0000-0000-000000000001", "asm-001", "baseline"):
+        assessment = await AssessmentOrchestrationService.get_or_create_personalized_assessment(user_id=user_id)
+        return AssessmentDetailResponse(**assessment)
+
+    # 2. Check if assessment_id is an existing AssessmentInstance
+    instance = AssessmentInstanceRepository.get_instance(assessment_id)
+    if instance:
+        items = AssessmentInstanceRepository.get_instance_items_for_learner(assessment_id)
+        assessment = {
+            "id": instance["id"],
+            "title": "VYREN Personalized Baseline Skill Assessment",
+            "description": "Scenario-based diagnostic evaluation calibrated to your cadre profile and analytical toolstack.",
+            "version": "2.0-personalized",
+            "time_limit_minutes": instance.get("time_limit_minutes", 20),
+            "generation_mode": instance.get("generation_mode", "ai_personalized"),
+            "total_items": len(items),
+            "blueprint": instance.get("blueprint"),
+            "items": items,
+        }
+        return AssessmentDetailResponse(**assessment)
+
+    # 3. Standard fallback to template
     assessment = AssessmentRepository.get_assessment_detail(assessment_id)
     if not assessment:
         raise HTTPException(

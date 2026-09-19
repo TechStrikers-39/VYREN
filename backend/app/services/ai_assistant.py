@@ -12,6 +12,7 @@ from fastapi import HTTPException, status
 from app.core.config import get_settings
 from app.repositories.competency_repo import CompetencyRepository
 from app.repositories.user_repo import UserRepository
+from app.services.validation_pipeline import ValidationPipeline
 
 logger = logging.getLogger(__name__)
 
@@ -161,6 +162,16 @@ class BaseAssistantProvider(ABC):
         locale: Optional[str] = "en",
     ) -> List[dict]:
         pass
+
+    @abstractmethod
+    async def generate_baseline_candidates(
+        self,
+        blueprint_dict: dict,
+        target_count: int = 12,
+        locale: Optional[str] = "en",
+    ) -> List[dict]:
+        pass
+
 
 
 class RealGeminiProvider(BaseAssistantProvider):
@@ -496,6 +507,121 @@ Return ONLY a valid JSON array of objects with the exact schema:
 
         return out
 
+    async def generate_baseline_candidates(
+        self,
+        blueprint_dict: dict,
+        target_count: int = 12,
+        locale: Optional[str] = "en",
+    ) -> List[dict]:
+        req_id = f"req-{uuid.uuid4().hex[:8]}"
+
+        desig = blueprint_dict.get("designation") or "Statistical Officer"
+        dept = blueprint_dict.get("department") or "National Statistical System"
+        scenario_context = blueprint_dict.get("scenario_context") or "Official statistical data administration"
+        tools = blueprint_dict.get("tools_context") or []
+        exp_band = blueprint_dict.get("experience_band") or "developing"
+        slots = blueprint_dict.get("competency_slots") or {}
+
+        slot_lines = []
+        for cid, slot in slots.items():
+            cname = slot.get("competency_name")
+            gcount = slot.get("generated_count", 3)
+            diff_dist = slot.get("difficulty_distribution") or {}
+            diff_str = f"EASY:{diff_dist.get('EASY', 0)}, MEDIUM:{diff_dist.get('MEDIUM', 2)}, HARD:{diff_dist.get('HARD', 1)}"
+            prof = slot.get("target_proficiency_band", "L1_through_L3")
+            slot_lines.append(f"- Competency: '{cname}' (ID: {cid}) -> Generate {gcount} questions. Target Proficiency: {prof}. Target Difficulty: {diff_str}")
+
+        slot_req_text = "\n".join(slot_lines)
+
+        lang_instruction = ""
+        if locale == "hi":
+            lang_instruction = "\nLANGUAGE REQUIREMENT: Write prompts, options, and pedagogical rationales in professional Hindi (हिन्दी). Standard technical terms [SQL, Python, R, GDP, GVA, CPI, WPI, NSS, PLFS, MoSPI, MLOps, ETL] are permitted in English."
+        elif locale == "mr":
+            lang_instruction = "\nLANGUAGE REQUIREMENT: Write prompts, options, and pedagogical rationales in professional Marathi (मराठी). Standard technical terms [SQL, Python, R, GDP, GVA, CPI, WPI, NSS, PLFS, MoSPI, MLOps, ETL] are permitted in English."
+
+        prompt_text = f"""You are an expert assessment item author for India's Official Statistical System (OSS), National Statistical Systems Training Academy (NSSTA), and Ministry of Statistics & Programme Implementation (MoSPI).{lang_instruction}
+
+Generate exactly {target_count} rigorous, scenario-based multiple-choice assessment items tailored to this official civil service profile:
+- Designation: {desig}
+- Department: {dept}
+- Experience Profile: {exp_band}
+- Operational Domain Context: {scenario_context}
+- Toolstack Experience: {', '.join(tools) if tools else 'Standard statistical packages'}
+
+REQUIRED COMPETENCY DISTRIBUTION:
+{slot_req_text}
+
+CRITICAL QUALITY SPECIFICATIONS:
+1. Exactly 4 distinct, plausible options per question.
+2. Exactly one correct answer index (0, 1, 2, or 3).
+3. Question prompt must be at least 35 characters long, contextualized with realistic Indian statistical administration scenarios (NSS surveys, national accounts, price indices, data governance, MLOps).
+4. Distractors must represent plausible statistical fallacies or anti-patterns, NEVER trivial giveaways like 'All of the above', 'None of the above', or 'Option A'.
+5. Include a thorough pedagogical rationale explaining why the keyed answer is correct and why distractors fail (at least 25 characters).
+6. Provide accurate competency_id matching the exact ID specified in the distribution.
+
+Return ONLY a valid JSON array of objects with the exact schema:
+[
+  {{
+    "competency_id": "c1000000-0000-0000-0000-000000000001",
+    "prompt": "Detailed, professional scenario-based statistical question statement...",
+    "options": ["Plausible Option 0", "Plausible Option 1", "Plausible Option 2", "Plausible Option 3"],
+    "correct_index": 0,
+    "difficulty": "MEDIUM",
+    "question_type": "SCENARIO",
+    "target_proficiency": 2,
+    "weight": 1.0,
+    "rationale": "Clear pedagogical explanation of why this answer is correct and why other options fail."
+  }}
+]"""
+
+        payload = {
+            "contents": [{"role": "user", "parts": [{"text": prompt_text}]}],
+            "generationConfig": {
+                "temperature": 0.15,
+                "responseMimeType": "application/json",
+                "thinkingConfig": {
+                    "thinkingBudget": 2048,
+                },
+            },
+        }
+
+        data = await self._execute_gemini_request(payload, req_id)
+        candidates = data.get("candidates", [])
+        if not candidates:
+            raise AIProviderUnavailableException("Gemini returned empty candidate response for baseline assessment generation.")
+
+        parts = candidates[0].get("content", {}).get("parts", [])
+        text_parts = [p["text"] for p in parts if "text" in p]
+        raw_text = "".join(text_parts).strip()
+
+        if raw_text.startswith("```json"):
+            raw_text = raw_text[7:]
+        if raw_text.startswith("```"):
+            raw_text = raw_text[3:]
+        if raw_text.endswith("```"):
+            raw_text = raw_text[:-3]
+
+        try:
+            raw_items = json.loads(raw_text.strip())
+        except Exception as parse_err:
+            logger.error(f"[AI Parse Error] request_id={req_id} error={parse_err}")
+            raise AIProviderUnavailableException(f"Failed to parse Gemini generated baseline questions as JSON: {parse_err}")
+
+        # Validate candidates through 18-stage pipeline with strict blueprint-slot alignment
+        allowed_cids = set(slots.keys()) if slots else None
+        validated_candidates = ValidationPipeline.validate_candidate_pool(
+            raw_items,
+            allowed_competency_ids=allowed_cids,
+            locale=locale or "en",
+        )
+        for it in validated_candidates:
+            it["provider"] = self.provider_name
+            it["model"] = self.model_name
+            it["mode"] = self.mode
+
+        return validated_candidates
+
+
 
 class UnavailableGeminiProvider(BaseAssistantProvider):
     """
@@ -554,6 +680,16 @@ class UnavailableGeminiProvider(BaseAssistantProvider):
             "Gemini AI is currently unavailable. Please verify that GEMINI_API_KEY is configured in backend/.env."
         )
 
+    async def generate_baseline_candidates(
+        self,
+        blueprint_dict: dict,
+        target_count: int = 12,
+        locale: Optional[str] = "en",
+    ) -> List[dict]:
+        raise AIProviderUnavailableException(
+            "Gemini AI is currently unavailable. Please verify that GEMINI_API_KEY is configured in backend/.env."
+        )
+
 
 def get_ai_provider() -> BaseAssistantProvider:
     settings = get_settings()
@@ -598,4 +734,17 @@ class AIAssistantService:
             focus_area=focus_area,
             locale=locale,
         )
+
+    @staticmethod
+    async def generate_baseline_candidates(
+        blueprint_dict: dict,
+        target_count: int = 12,
+        locale: Optional[str] = "en",
+    ) -> List[dict]:
+        return await get_ai_provider().generate_baseline_candidates(
+            blueprint_dict=blueprint_dict,
+            target_count=target_count,
+            locale=locale,
+        )
+
 

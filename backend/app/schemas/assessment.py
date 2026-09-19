@@ -13,6 +13,8 @@ class AssessmentItemResponse(BaseModel):
     weight: float = 1.0
     difficulty: str
     order_index: int
+    item_source: Optional[str] = "anchor"
+    question_type: Optional[str] = "APPLIED"
 
 
 class AssessmentDetailResponse(BaseModel):
@@ -21,6 +23,9 @@ class AssessmentDetailResponse(BaseModel):
     description: Optional[str] = None
     version: str
     time_limit_minutes: int
+    total_items: Optional[int] = None
+    generation_mode: Optional[str] = None
+    blueprint: Optional[Dict[str, Any]] = None
     items: List[AssessmentItemResponse]
 
 

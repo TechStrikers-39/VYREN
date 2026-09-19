@@ -3,10 +3,14 @@ import { Assessment, Question } from '@/types';
 export interface AssessmentItem extends Question {
   targetCompetency: string;
   weight: number;
+  itemSource?: string;
+  questionType?: string;
 }
 
 export interface DetailedAssessment extends Assessment {
   items: AssessmentItem[];
+  generationMode?: string;
+  blueprint?: any;
 }
 
 export const mockDetailedAssessment: DetailedAssessment = {

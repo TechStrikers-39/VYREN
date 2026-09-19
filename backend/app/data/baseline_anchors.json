@@ -1,0 +1,422 @@
+[
+  {
+    "id": "e1000000-0000-0000-0000-000000000001",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000001",
+    "prompt": "A p-value of 0.03 is obtained in a hypothesis test. Which of the following is the correct interpretation at α = 0.05?",
+    "options": [
+      "There is a 3% probability the null hypothesis is true",
+      "We reject the null hypothesis — the result is statistically significant",
+      "The effect size is small",
+      "The test has 97% statistical power"
+    ],
+    "correct_index": 1,
+    "weight": 1.0,
+    "difficulty": "EASY",
+    "question_type": "CONCEPTUAL",
+    "rationale": "When p (0.03) is below alpha (0.05), we reject the null hypothesis — the result is statistically significant. It does not state the probability that H0 is true.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 1
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000002",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000001",
+    "prompt": "Which technique is most appropriate to reduce multicollinearity in a regression model?",
+    "options": [
+      "Increase the sample size",
+      "Apply Principal Component Analysis (PCA) before regression",
+      "Remove the dependent variable",
+      "Use a higher significance level"
+    ],
+    "correct_index": 1,
+    "weight": 1.5,
+    "difficulty": "HARD",
+    "question_type": "APPLIED",
+    "rationale": "Applying Principal Component Analysis (PCA) transforms correlated predictor variables into orthogonal principal components, effectively eliminating multicollinearity before fitting regression models.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 2
+  },
+  {
+    "id": "f7a3593b-c9d3-40aa-a945-e1dc0558c530",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000001",
+    "prompt": "What is the key assumption of Ordinary Least Squares (OLS) regression regarding error terms?",
+    "options": [
+      "Errors are non-normal",
+      "Errors have constant variance (homoscedasticity)",
+      "Errors are dependent",
+      "Errors have non-zero mean"
+    ],
+    "correct_index": 1,
+    "weight": 1.0,
+    "difficulty": "HARD",
+    "question_type": "CONCEPTUAL",
+    "rationale": "Under Gauss-Markov assumptions for OLS regression, error terms must exhibit constant variance across all observations (homoscedasticity) to ensure estimators remain Best Linear Unbiased Estimators (BLUE).",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 3
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000010",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000001",
+    "prompt": "In MoSPI's National Sample Survey (NSS) design, what is the primary statistical justification for employing Stratified Multi-Stage Sampling (FSUs: villages/UFS blocks; SSUs: households) rather than Simple Random Sampling (SRS) nationally?",
+    "options": [
+      "To eliminate all sampling error completely across urban and rural sectors",
+      "To maximize operational feasibility and reduce survey traversal costs while maintaining valid design-based domain estimators",
+      "Because SRS requires equal household expenditure distribution which violates normality",
+      "To ensure every surveyed household has an identical selection probability of 1.0"
+    ],
+    "correct_index": 1,
+    "weight": 1.5,
+    "difficulty": "HARD",
+    "question_type": "SCENARIO",
+    "rationale": "First Stage Units cluster geographic traversal to maximize operational feasibility and reduce survey traversal costs while multi-stage probability sampling preserves valid design-based domain estimators.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 4
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000011",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000001",
+    "prompt": "In NSS estimation methodology, what represents the inverse of the inclusion probability of a sample household, and how is it utilized in generating aggregate population estimates?",
+    "options": [
+      "The Laspeyres multiplier, used to deflate household nominal consumption expenditures",
+      "The sampling weight (multiplier), where each sampled unit represents a reciprocal number of universe units",
+      "The Gini correction coefficient, used to adjust for non-response clustering",
+      "The Finite Population Correction factor, used to reduce sample variance to zero"
+    ],
+    "correct_index": 1,
+    "weight": 1.2,
+    "difficulty": "MEDIUM",
+    "question_type": "APPLIED",
+    "rationale": "Under Horvitz-Thompson estimation, the sampling weight (multiplier) is the reciprocal of inclusion probability (1/pi_i). Applying multipliers inflates sample observations to true universe totals without bias.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 5
+  },
+  {
+    "id": "c3d83ced-8f97-4969-9aa0-9c75986e65e8",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000001",
+    "prompt": "In the Periodic Labour Force Survey (PLFS), how is Worker Population Ratio (WPR) mathematically defined under MoSPI standards?",
+    "options": [
+      "Percentage of employed persons in the total population",
+      "Percentage of unemployed persons in the labour force",
+      "Percentage of persons in the labour force relative to total population",
+      "Ratio of formal sector workers to informal sector workers"
+    ],
+    "correct_index": 0,
+    "weight": 1.2,
+    "difficulty": "MEDIUM",
+    "question_type": "APPLIED",
+    "rationale": "Under official MoSPI PLFS definitions, the Worker Population Ratio (WPR) is defined as the percentage of employed persons in the total population: (Number of employed persons / Total population) * 100.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 6
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000003",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000002",
+    "prompt": "In a data pipeline, what is the primary purpose of an idempotent operation?",
+    "options": [
+      "Improve query performance",
+      "Ensure the same result regardless of how many times the operation is executed",
+      "Encrypt data at rest",
+      "Enable horizontal scaling"
+    ],
+    "correct_index": 1,
+    "weight": 1.0,
+    "difficulty": "MEDIUM",
+    "question_type": "CONCEPTUAL",
+    "rationale": "An idempotent operation ensures the same result regardless of how many times the operation is executed, preventing duplicate records or corrupted state during retries or re-executions.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 7
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000012",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000002",
+    "prompt": "In official Indian Consumer Price Index (CPI) compilation (Base Year 2012=100), which index aggregation formulation is predominantly utilized at the subgroup and group level?",
+    "options": [
+      "Paasche index, which recalculates commodity expenditure weights dynamically every reporting month",
+      "Modified Laspeyres formula, using fixed base-period expenditure share weights applied to current price relatives",
+      "Fisher Ideal index, computing the harmonic mean between rural and urban price quotations",
+      "Hedonic regression index, adjusting for quality improvements using unweighted logarithmic returns"
+    ],
+    "correct_index": 1,
+    "weight": 1.3,
+    "difficulty": "MEDIUM",
+    "question_type": "APPLIED",
+    "rationale": "In official CPI compilation, MoSPI uses the Modified Laspeyres formula with fixed base-period expenditure share weights applied to current price relatives to ensure consistent aggregation across reporting months.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 8
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000013",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000002",
+    "prompt": "When an identified specification for a commodity in the CPI basket permanently disappears from a sampled market, how does MoSPI methodology handle the missing item to prevent substitution bias?",
+    "options": [
+      "The commodity weight is permanently deleted and reallocated to food and beverages",
+      "Comparable item substitution with base-price imputation (overlap pricing or spliced relative method)",
+      "Assuming the missing item has undergone zero price change for all subsequent quarters",
+      "Setting the missing item's current price to the state capital's wholesale price"
+    ],
+    "correct_index": 1,
+    "weight": 1.4,
+    "difficulty": "HARD",
+    "question_type": "SCENARIO",
+    "rationale": "Under CPI methodology, missing item specifications require comparable item substitution with base-price imputation (overlap pricing or spliced relative method) to prevent artificial price jumps or substitution bias.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 9
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000020",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000002",
+    "prompt": "In a state-level statistical survey data pipeline, which architecture pattern ensures that downstream aggregations are not corrupted when upstream district offices retransmit corrected survey batches multiple times?",
+    "options": [
+      "At-least-once ingestion with idempotent database upserts keyed on survey unit identifiers",
+      "Strict FIFO queueing without primary key constraints",
+      "Appending incoming raw records to a flat table with auto-incrementing surrogate keys",
+      "Dropping and recreating the target survey schema on every batch transmission"
+    ],
+    "correct_index": 0,
+    "weight": 1.0,
+    "difficulty": "MEDIUM",
+    "question_type": "SCENARIO",
+    "rationale": "At-least-once ingestion with idempotent database upserts keyed on survey unit identifiers guarantees that retransmitted batches update existing rows rather than duplicating counts in downstream aggregates.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 10
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000021",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000002",
+    "prompt": "When designing an ETL pipeline to compute the All-India Index of Industrial Production (IIP), what mechanism is essential to handle late-arriving data from non-responding factories without invalidating past published monthly series?",
+    "options": [
+      "Overwriting historical production figures silently without version timestamps",
+      "Imputing zero output for all late-reporting factories and closing the reporting period permanently",
+      "Maintaining quick estimates and revised estimates using bi-temporal tracking (valid time vs. transaction time)",
+      "Discarding late-arriving records if they arrive after the preliminary index release date"
+    ],
+    "correct_index": 2,
+    "weight": 1.0,
+    "difficulty": "HARD",
+    "question_type": "APPLIED",
+    "rationale": "Maintaining quick estimates and revised estimates using bi-temporal tracking (valid time vs. transaction time) allows historical time series to be revised accurately while preserving an immutable audit log of preliminary published indices.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 11
+  },
+  {
+    "id": "bff03e8d-07b3-4013-91cf-ebe4ef5de611",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000003",
+    "prompt": "MoSPI is integrating a Generalized Regression Estimator (GREG) within an automated MLOps pipeline to estimate crop yields using satellite imagery and NSSO ground truth. To minimize the design variance of the GREG estimator, how should the machine learning model's loss function be configured during the automated hyperparameter tuning (AutoML) phase?",
+    "options": [
+      "The loss function must minimize the design-weighted residual sum of squares (weighted MSE) to align with the design-based variance formulation.",
+      "The loss function should maximize the unweighted R-squared value on a random validation split to ensure general predictive accuracy.",
+      "The loss function must minimize the L1 norm of the model coefficients to force sparsity, ignoring the survey design weights.",
+      "The loss function should be configured to maximize the entropy of the predicted strata boundaries across the geographic regions."
+    ],
+    "correct_index": 0,
+    "weight": 1.0,
+    "difficulty": "MEDIUM",
+    "question_type": "SCENARIO",
+    "rationale": "The loss function must minimize the design-weighted residual sum of squares (weighted MSE) to align with the design-based variance formulation of GREG estimators under complex survey sample designs.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 12
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000004",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000003",
+    "prompt": "What is model drift, and why does it matter in production ML systems?",
+    "options": [
+      "A bug introduced during model deployment",
+      "The gradual degradation of model performance due to changes in real-world data distribution",
+      "An overfit model that performs poorly on training data",
+      "A technique for reducing model file size"
+    ],
+    "correct_index": 1,
+    "weight": 1.0,
+    "difficulty": "MEDIUM",
+    "question_type": "CONCEPTUAL",
+    "rationale": "Model drift is the gradual degradation of model performance due to changes in real-world data distribution over time, requiring continuous monitoring and retraining pipelines.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 13
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000022",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000003",
+    "prompt": "When deploying a computer vision model for automated crop area estimation from satellite imagery across Indian agricultural seasons, what is the primary operational cause of performance degradation between Kharif and Rabi seasons?",
+    "options": [
+      "Data drift caused by changes in crop phenology, soil reflectance, and seasonal spectral signatures",
+      "Hardware thermal throttling in edge inference servers during winter months",
+      "Incompatibility of model ONNX runtime binaries between cloud hosting regions",
+      "Degradation of satellite sensor resolution during low-temperature orbital passes"
+    ],
+    "correct_index": 0,
+    "weight": 1.0,
+    "difficulty": "MEDIUM",
+    "question_type": "SCENARIO",
+    "rationale": "Data drift caused by changes in crop phenology, soil reflectance, and seasonal spectral signatures alters the underlying distribution of satellite features between Kharif and Rabi seasons, necessitating domain adaptation or seasonal retraining.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 14
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000023",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000003",
+    "prompt": "In an automated administrative data-matching pipeline using machine learning record linkage, what deployment strategy minimizes false-merge risk when rolling out an updated probabilistic linkage model?",
+    "options": [
+      "Direct hot-swap deployment to production without baseline comparison",
+      "Shadow deployment (dark launch) comparing predictions against the champion model on live traffic before promotion",
+      "Retraining the model on 100% of newly ingested unverified records without manual auditing",
+      "Lowering classification thresholds to maximize recall regardless of precision"
+    ],
+    "correct_index": 1,
+    "weight": 1.0,
+    "difficulty": "HARD",
+    "question_type": "APPLIED",
+    "rationale": "Shadow deployment (dark launch) comparing predictions against the champion model on live traffic before promotion allows engineers to observe differences in record merges and identify regressions without impacting production data integrity.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 15
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000024",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000003",
+    "prompt": "Under an MLOps governance framework for MoSPI predictive statistical indicators, which artifact repository practice ensures complete auditability and reproducibility of published figures?",
+    "options": [
+      "Exporting final tabular forecasts to unversioned CSV spreadsheets",
+      "Immutable versioning linking the exact training dataset hash, feature pipeline code, model weights, and hyperparameters",
+      "Deleting historical training datasets after model convergence to optimize storage costs",
+      "Relying exclusively on non-deterministic online learning with real-time gradient updates"
+    ],
+    "correct_index": 1,
+    "weight": 1.0,
+    "difficulty": "HARD",
+    "question_type": "APPLIED",
+    "rationale": "Immutable versioning linking the exact training dataset hash, feature pipeline code, model weights, and hyperparameters guarantees end-to-end provenance so any published statistical figure can be independently recomputed and audited.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 16
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000005",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000004",
+    "prompt": "Which of the following best describes data lineage?",
+    "options": [
+      "A method for compressing large datasets",
+      "The tracking of data's origins, transformations, and movement across systems",
+      "A data encryption standard for secure storage",
+      "A technique for de-duplicating records in a data warehouse"
+    ],
+    "correct_index": 1,
+    "weight": 1.0,
+    "difficulty": "EASY",
+    "question_type": "CONCEPTUAL",
+    "rationale": "Data lineage is the tracking of data's origins, transformations, and movement across systems throughout its lifecycle, providing transparency, auditability, and impact analysis.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 17
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000014",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000004",
+    "prompt": "Under the revised Indian National Accounts framework (2011-12 series), what is the exact conceptual relationship between Gross Value Added (GVA) at basic prices and Gross Domestic Product (GDP) at market prices?",
+    "options": [
+      "GDP at market prices = GVA at basic prices + Product Taxes - Product Subsidies",
+      "GDP at market prices = GVA at basic prices - Production Taxes + Production Subsidies",
+      "GDP at market prices = GVA at basic prices + Net Factor Income from Abroad",
+      "GVA at basic prices = GDP at market prices + Depreciation of fixed capital"
+    ],
+    "correct_index": 0,
+    "weight": 1.5,
+    "difficulty": "MEDIUM",
+    "question_type": "APPLIED",
+    "rationale": "Under SNA 2008 and MoSPI National Accounts, GDP at market prices = GVA at basic prices + Product Taxes - Product Subsidies. Basic prices exclude product taxes and include production taxes.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 18
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000015",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000004",
+    "prompt": "Why is the 'Double Deflation' method considered by statistical agencies like MoSPI and international standards (SNA 2008) to be superior to single indicator deflation in estimating Real Gross Value Added?",
+    "options": [
+      "Because it deflates both nominal wages and capital depreciation at identical consumer price rates",
+      "Because it deflates gross output with output price indices and intermediate inputs with input price indices separately",
+      "Because it averages the GDP deflator and CPI index to produce double accuracy",
+      "Because it eliminates the need to track intermediate consumption or enterprise input costs"
+    ],
+    "correct_index": 1,
+    "weight": 1.5,
+    "difficulty": "HARD",
+    "question_type": "CONCEPTUAL",
+    "rationale": "Double deflation deflates gross output with output price indices and intermediate inputs with input price indices separately, correctly reflecting relative price shifts between inputs and outputs rather than assuming uniform price movements.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 19
+  },
+  {
+    "id": "e1000000-0000-0000-0000-000000000025",
+    "assessment_id": "a1000000-0000-0000-0000-000000000001",
+    "competency_id": "c1000000-0000-0000-0000-000000000004",
+    "prompt": "Under the Digital Personal Data Protection (DPDP) Act and official statistical confidentiality standards, what technique allows MoSPI to release microdata from household consumer expenditure surveys without risking re-identification of respondents?",
+    "options": [
+      "Publishing raw survey records with only names removed while keeping exact addresses and dates of birth intact",
+      "Statistical disclosure control using k-anonymity, l-diversity, and top-coding of extreme expenditure values",
+      "Storing survey microdata in public read-only cloud storage buckets",
+      "Encrypting published datasets with a single symmetric key shared publicly"
+    ],
+    "correct_index": 1,
+    "weight": 1.0,
+    "difficulty": "MEDIUM",
+    "question_type": "APPLIED",
+    "rationale": "Statistical disclosure control using k-anonymity, l-diversity, and top-coding of extreme expenditure values protects data privacy under the DPDP Act by ensuring individuals cannot be uniquely re-identified through quasi-identifiers in published survey microdata.",
+    "language": "en",
+    "quality_status": "validated",
+    "source": "domain_authored",
+    "order_index": 20
+  }
+]

@@ -66,7 +66,7 @@ const AssessmentInner: React.FC = () => {
         <div className="w-8 h-8 mx-auto border-2 border-primary-navy border-t-transparent rounded-full animate-spin" />
         <div className="space-y-1">
           <p className="text-sm font-bold text-text-primary">Loading Skill Assessment</p>
-          <p className="text-xs font-mono text-text-secondary">Retrieving 17-item competency assessment from MoSPI NSSTA gateway...</p>
+          <p className="text-xs font-mono text-text-secondary">Retrieving 18-item competency assessment from MoSPI NSSTA gateway...</p>
         </div>
       </div>
     );
@@ -197,6 +197,12 @@ const AssessmentInner: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-primary-navy/5 border border-primary-navy/15 text-[11px] font-mono font-bold text-primary-navy uppercase tracking-wider">
               <ShieldCheck className="w-3.5 h-3.5" />
               SKILL ASSESSMENT &bull; MoSPI &amp; NSSTA
+              {assessment.generationMode === 'ai_personalized' && (
+                <>
+                  <span>&bull;</span>
+                  <span className="text-action-blue font-bold">CADRE PERSONALIZED</span>
+                </>
+              )}
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-text-primary">
               {assessment.title}

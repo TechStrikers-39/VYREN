@@ -6,10 +6,13 @@ class UserRepository:
     @staticmethod
     def get_profile(user_id: str) -> dict | None:
         supabase = get_supabase()
-        res = supabase.table("profiles").select("*").eq("id", user_id).single().execute()
-        if not res.data:
+        try:
+            res = supabase.table("profiles").select("*").eq("id", user_id).single().execute()
+            if not res.data:
+                return None
+            profile = res.data
+        except Exception:
             return None
-        profile = res.data
         # Decode fallback context if present in igot_id
         igot_id = profile.get("igot_id") or ""
         if igot_id.startswith("CTX:"):

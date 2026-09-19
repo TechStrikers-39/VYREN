@@ -134,6 +134,7 @@ class ScoringEngine:
 
             explanation = (
                 item.get("explanation")
+                or item.get("rationale")
                 or RATIONALE_REGISTRY.get(item_id)
                 or f"Correct: '{correct_text}'. Under MoSPI competency standards, this principle ensures reproducible, statistically valid, and fault-tolerant data operations."
             )

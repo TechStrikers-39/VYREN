@@ -394,7 +394,7 @@ export const AssistantPage: React.FC = () => {
                       </Link>
                       <span className="text-border">&bull;</span>
                       <Link
-                        to={ROUTES.LEARNER.ASSESSMENT('asm-001')}
+                        to={ROUTES.LEARNER.ASSESSMENT('a1000000-0000-0000-0000-000000000001')}
                         className="inline-flex items-center gap-1 text-action-blue hover:underline"
                       >
                         <Award className="w-3 h-3" />

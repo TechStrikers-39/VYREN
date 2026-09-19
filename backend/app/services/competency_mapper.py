@@ -202,3 +202,75 @@ class CompetencyMapperService:
         if not mapped_results:
             return None
         return mapped_results[0]["competency_id"]
+
+    @classmethod
+    def score_text_against_competency(
+        cls,
+        text: str,
+        competency_id: str,
+        competency_keywords: Optional[List[str]] = None,
+    ) -> float:
+        """
+        Calculates a normalized score (0.0 - 1.0) of how strongly a given text
+        (e.g., responsibilities) aligns with a specific competency's domain keywords.
+        """
+        if not text:
+            return 0.0
+
+        keywords = competency_keywords
+        if not keywords:
+            for core in VYREN_CORE_COMPETENCIES:
+                if core["id"] == competency_id:
+                    keywords = core["keywords"]
+                    break
+
+        if not keywords:
+            return 0.0
+
+        lower_text = text.lower()
+        hit_count = 0
+        for kw in keywords:
+            if re.search(r"\b" + re.escape(kw.lower()) + r"\b", lower_text):
+                hit_count += 1
+
+        if hit_count == 0:
+            return 0.0
+        # 1 hit = 0.35, 2 hits = 0.65, 3+ hits = 0.90 - 1.0
+        return min(1.0, round(0.20 + (hit_count * 0.25), 2))
+
+    @classmethod
+    def score_tools_against_competency(
+        cls,
+        tools: List[str],
+        competency_id: str,
+    ) -> float:
+        """
+        Calculates a normalized alignment score (0.0 - 1.0) of tools/technologies
+        against a specific competency domain.
+        """
+        if not tools:
+            return 0.0
+
+        tool_domain_mappings: Dict[str, List[str]] = {
+            "c1000000-0000-0000-0000-000000000001": ["python", "r", "stata", "spss", "excel", "sas", "scipy", "statsmodels"],
+            "c1000000-0000-0000-0000-000000000002": ["sql", "postgresql", "kafka", "spark", "airflow", "dbt", "etl", "data warehouse", "lakehouse"],
+            "c1000000-0000-0000-0000-000000000003": ["scikit-learn", "scikit", "pytorch", "tensorflow", "mlflow", "docker", "kubeflow", "automl", "onnx"],
+            "c1000000-0000-0000-0000-000000000004": ["collibra", "dpdp", "governance", "lineage", "catalog", "great expectations", "purview", "dama"],
+        }
+
+        domain_tools = tool_domain_mappings.get(competency_id, [])
+        if not domain_tools:
+            return 0.0
+
+        hit_count = 0
+        for t in tools:
+            t_lower = t.lower()
+            for dt in domain_tools:
+                if dt in t_lower:
+                    hit_count += 1
+                    break
+
+        if hit_count == 0:
+            return 0.0
+        return min(1.0, round(hit_count * 0.40, 2))
+
