@@ -18,12 +18,12 @@
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.11%20%7C%20Pydantic-009688?style=flat-square&logo=fastapi&logoColor=white)](#-technology-stack)
 [![Supabase](https://img.shields.io/badge/Database-Supabase%20PostgreSQL%20%7C%20RLS-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](#-technology-stack)
 [![Google Gemini](https://img.shields.io/badge/AI%20Engine-Google%20Gemini%201.5%20Flash-4285F4?style=flat-square&logo=google-gemini&logoColor=white)](#-ai-architecture--governance-boundaries)
-[![Test Suite](https://img.shields.io/badge/Tests-25%2F25%20Passing%20(100%25)-brightgreen?style=flat-square&logo=pytest&logoColor=white)](#-verification-suite)
+[![Test Suite](https://img.shields.io/badge/Tests-33%2F33%20Passing%20(100%25)-brightgreen?style=flat-square&logo=pytest&logoColor=white)](#-verification-suite)
 [![i18n](https://img.shields.io/badge/i18n-English%20%7C%20%E0%A4%B9%E0%A4%BF%E0%A4%A8%E0%A5%8D%E0%A4%A6%E0%A5%80%20%7C%20%E0%A4%AE%E0%A4%B0%E0%A4%BE%E0%A4%A0%E0%A5%80-8B5CF6?style=flat-square)](#-internationalization-i18n)
 
 <br/>
 
-[Executive Summary](#-executive-summary) • [The Core Problem](#-the-core-problem) • [Closed-Loop Lifecycle](#-closed-loop-competency-lifecycle) • [Competency Framework](#-competency-framework--scoring-model) • [Personalized Diagnostic](#-personalized-baseline-diagnostic-engine) • [MCQ Validation Pipeline](#-9-stage-mcq-validation-pipeline) • [iGOT Integration](#-igot-karmayogi--sunbird-integration) • [System Architecture](#-system-architecture) • [Getting Started](#-getting-started) • [Team](#-team-tσch-strikσrs)
+[Executive Summary](#-executive-summary) • [The Core Problem](#-the-core-problem) • [Closed-Loop Lifecycle](#-closed-loop-competency-lifecycle) • [Competency Framework](#-competency-framework--scoring-model) • [Personalized Diagnostic](#-personalized-baseline-diagnostic-engine) • [MCQ Validation Pipeline](#-9-stage-mcq-validation-pipeline) • [iGOT Integration](#-igot-karmayogi--sunbird-integration) • [System Architecture](#-system-architecture) • [Getting Started](#-getting-started) • [Team](#-team-t8ch-strik8rs)
 
 </div>
 
@@ -236,6 +236,53 @@ Onboarding Profile (Cadre, Wing, Role)
 * **Server-Side Evaluation:** Scoring is executed entirely in `assessment_orchestrator.py` against the persisted instance snapshot.
 * **Instance State Locking:** Upon submission, the instance status transitions from `in_progress` to `completed`, rendering the token immutable to replay attacks.
 
+### ⚡ Asynchronous Assessment Pre-Generation & In-Flight Concurrency Registry
+To eliminate the 15–22 second cold-start latency previously experienced by civil servants when generating personalized assessments via generative models, VYREN implements background assessment pre-generation:
+
+```
+[Officer Completes Onboarding] 
+             │
+             ├──► 1. Profile Persisted to Supabase (onboarding_completed = true)
+             │
+             ├──► 2. FastAPI BackgroundTasks Enqueues Pre-Generation Worker
+             │       └─► Executes AssessmentOrchestrationService in background
+             │
+             └──► 3. Officer Immediately Lands on Dashboard (< 200 ms response)
+                     │
+                     ▼
+             [Officer Clicks "Take Assessment"]
+                     │
+                     ├──► Case A (Normal): Assessment instance already generated in DB (Retrieval: < 50 ms)
+                     │
+                     └──► Case B (Immediate Click): Concurrent GET joins active in-flight task
+                             └─► _IN_FLIGHT_GENERATIONS deduplicates task; zero duplicate Gemini calls
+```
+
+* **Per-User Concurrency Locking:** The registry uses an `asyncio.Lock` and per-user dictionary `_IN_FLIGHT_GENERATIONS` in `assessment_orchestrator.py`. If a user refreshes or opens the assessment before background generation finishes, the foreground request joins and awaits the active task rather than triggering redundant LLM calls.
+* **Instance Snapshot Reuse:** Once generated, subsequent page visits or reloads instantly serve the existing active instance without calling generative models again.
+
+### 🛡️ Honest Diagnostic Preparation UX
+In accordance with ethical civil-service UX standards, VYREN's assessment loading screen adheres to 100% transparency:
+* **No Artificial Delay or Progress:** Strictly avoids fake percentage progress bars, simulated countdowns, or deceptive checkmarks.
+* **4-Phase Diagnostic Architecture Matrix:** Explains the real computational steps underway:
+  1. *Professional Context:* Calibrated to the officer's specific cadre wing, division, and analytical toolstack.
+  2. *Competency Coverage:* Spanning 4 core statistical framework domains.
+  3. *Applied Scenarios:* Generating realistic administrative and data dilemmas.
+  4. *Quality Validation:* Executing deterministic 9-stage validation and answer-key integrity checks.
+* **Clear Epistemic Distinction:** Explicitly informs the officer: *"Your onboarding profile helps determine what the diagnostic should measure. Your responses determine your measured competency."*
+
+### 🔄 Isolated Demo Learner Reset Architecture
+For repeatable hackathon evaluation and continuous integration testing, VYREN provides an isolated state reset endpoint (`POST /learner/demo-reset`):
+* **Strict Dual-Identity Gate:** Strictly restricted to the designated demo account:
+  - **UUID:** `7912b349-a54d-4938-bf2e-23b0af8ae5d9`
+  - **Email:** `alex.vance@gmail.com`
+  - *All other users, trainers, and administrators are rejected with HTTP 403 Forbidden.*
+* **Zero Body Payload (IDOR-Proof):** The endpoint accepts no request body; identity is extracted exclusively from the authenticated JWT.
+* **Foreign-Key Safe Decoupling:** Nulls circular references between `assessment_instances.result_id` and `assessment_results.instance_id` before executing cascaded deletions across items, instances, results, derived skill gaps, recommendations, and enrollments.
+* **In-Flight & Memory Purge:** Cancels running generation tasks in `_IN_FLIGHT_GENERATIONS` and purges memory caches in `_MEMORY_INSTANCES`.
+* **Zero Auth Destruction:** Preserves the Supabase Auth user while returning `profiles` to a clean un-onboarded baseline (`onboarding_completed: false`).
+* **Dedicated UI Trigger:** Renders an amber "Reset Demo" button and confirmation dialog in `TopNavHeader` strictly for the demo learner.
+
 ---
 
 ## 🛡️ 9-Stage MCQ Validation Pipeline
@@ -278,9 +325,12 @@ VYREN bridges diagnostic evaluation with national training infrastructure by int
 ### 1. 🎓 Learner Workspace (Personal Competency Hub)
 * **Cadre-Aware Onboarding:** Ingests officer designation, cadre wing (ISS, SSS, State DES), and operational responsibilities.
 * **18-Item Personalized Diagnostic:** Interactive assessment with real-time countdown timer, progress telemetry, and responsive options.
+* **Honest Preparation UX:** Real-time 4-step diagnostic preparation sequence communicating active synthesis without deceptive loading artifacts.
 * **Visual Competency Radar:** Multi-dimensional spider charts displaying measured scores against Level 3 cadre benchmarks.
 * **Explainable Recommendations:** Plain-language rationales for why each specific iGOT course is prescribed.
+* **Institutional Help & Guide:** Persistent footer-accessible drawer presenting the 6-stage Mission Karmayogi journey and operational FAQ across 3 official languages.
 * **Grounded AI Assistant:** Conversational mentor grounded in the learner's active measured dossier, CBC standards, and assigned learning modules.
+* **Demo Learner Reset:** Secure state restoration for evaluation accounts directly accessible from the navigation header.
 * **Multilingual Switcher:** Instant interface switching between **English**, **हिन्दी**, and **मराठी**.
 
 ### 2. 👨‍🏫 Trainer Studio (Authoring & Cohort Intelligence)
@@ -372,11 +422,11 @@ graph TD
 
 | Layer | Technologies | Key Responsibilities |
 | :--- | :--- | :--- |
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, OGL WebGL | High-performance SPA, WCAG 2.1 AA compliant UI, interactive radars, dynamic assessment timers |
-| **Backend** | Python 3.11, FastAPI, Uvicorn, Pydantic v2, HTTPX | High-throughput REST API, deterministic scoring pipelines, asynchronous LLM dispatch |
-| **Database** | Supabase PostgreSQL, `pgvector`, Connection Pooling | Relational integrity, Row-Level Security, vector embeddings, atomic transactions |
-| **AI Layer** | Google Gemini 1.5 Flash via REST API | Candidate question drafting, pedagogical explanations, conversational competency mentoring |
-| **Security** | ES256 Asymmetric JWT, bcrypt, PyJWT | Cryptographic token signing, role-based endpoint protection, strict IDOR isolation |
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, OGL WebGL | High-performance SPA, WCAG 2.1 AA compliant UI, interactive radars, dynamic assessment timers, honest preparation view |
+| **Backend** | Python 3.11, FastAPI, Uvicorn, Pydantic v2, HTTPX | High-throughput REST API, deterministic scoring pipelines, asynchronous pre-generation & concurrency registry |
+| **Database** | Supabase PostgreSQL, `pgvector`, Connection Pooling | Relational integrity, Row-Level Security, vector embeddings, atomic transactions, FK-decoupled instance storage |
+| **AI Layer** | Google Gemini 1.5 Flash / 2.0 Flash via REST API | Candidate question drafting, pedagogical explanations, conversational competency mentoring |
+| **Security** | ES256 Asymmetric JWT, bcrypt, PyJWT, RBAC | Cryptographic token signing, role-based endpoint protection, strict IDOR isolation, dual-identity demo gates |
 | **External** | DoPT Sunbird iGOT APIs (`igotkarmayogi.gov.in`) | Live public course catalog ingestion, semantic course discovery, syllabus mapping |
 
 ---
@@ -416,19 +466,24 @@ The platform utilizes a structured, forward-only PostgreSQL schema managed via S
 
 ## 🧪 Verification Suite
 
-The repository contains an extensive automated test suite verifying every component from unit logic to end-to-end orchestration:
+The repository contains an extensive automated test suite verifying every component from unit logic to end-to-end orchestration (**33/33 tests passing, 100% pass rate**):
 
 ```bash
 # Activate Python virtual environment:
 cd backend
-.venv\Scriptsctivate   # Windows
+.venv\Scripts\activate   # Windows
 # source .venv/bin/activate  # macOS / Linux
 
-# Run complete personalized assessment test suite (25/25 Passing):
-pytest tests/test_personalized_assessment_e2e.py        tests/test_blueprint_selector.py        tests/test_blueprint_slot_validation.py        tests/test_offline_anchor_fallback.py        tests/test_stage17_consistency.py        tests/test_targeting_engine.py        tests/test_validation_pipeline.py -v
+# Run complete backend test suite (33/33 Passing):
+python -m unittest discover -s tests
+
+# Alternatively, run via pytest:
+pytest tests/ -v
 ```
 
 ### 📋 Test Suite Breakdown
+* `test_demo_reset.py` (23 tests): Exhaustive testing of isolated Demo Learner Reset feature—verifying strict dual-identity gates (`alex.vance@gmail.com`), HTTP 403 authorization bounds, FK decoupling, cascading state deletions, in-memory cache eviction, other user tenant isolation, and re-onboarding pipeline triggers.
+* `test_pregeneration_concurrency.py` (10 tests): Validates Phase 14C asynchronous pre-generation, per-user in-flight concurrency locks (`_IN_FLIGHT_GENERATIONS`), instance reuse upon refresh, transient error recovery, and zero answer-key leakage.
 * `test_personalized_assessment_e2e.py`: End-to-end test verifying onboarding → 18-item blueprint → instance creation → submission → Level 0–4 score recalibration.
 * `test_blueprint_selector.py`: Verifies deterministic slot selection across all 4 statistical domains.
 * `test_blueprint_slot_validation.py`: Verifies slot fulfillment and cognitive level alignment.
@@ -436,6 +491,7 @@ pytest tests/test_personalized_assessment_e2e.py        tests/test_blueprint_sel
 * `test_stage17_consistency.py`: Enforces deterministic answer-key integrity and option mapping.
 * `test_targeting_engine.py`: Tests profile-to-difficulty calibration.
 * `test_validation_pipeline.py`: Validates all 9 quality checks on candidate questions.
+* `test_scoring_engine.py`: Verifies independent Level 0–4 score conversions and epistemic Evidence Confidence formulas.
 
 ---
 
@@ -504,7 +560,7 @@ Language switching operates seamlessly without page reloading and persists acros
 
 ---
 
-## 👥 Team TΣCH STRIKΣRS
+## 👥 Team T8CH STRIK8RS
 
 Proudly developed for **Smart India Hackathon 2026**.
 
