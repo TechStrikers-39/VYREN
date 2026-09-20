@@ -5,6 +5,8 @@ import { AssessmentResult } from '@/types';
 
 interface AssessmentContextType {
   assessment: DetailedAssessment | null;
+  isLoading: boolean;
+  error: string | null;
   currentQuestionIndex: number;
   answers: Record<string, number>;
   result: AssessmentResult | null;
@@ -24,6 +26,8 @@ const AssessmentContext = createContext<AssessmentContextType | undefined>(undef
 
 export const AssessmentContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [assessment, setAssessment] = useState<DetailedAssessment | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<AssessmentResult | null>(null);
@@ -34,14 +38,24 @@ export const AssessmentContextProvider: React.FC<{ children: React.ReactNode }> 
   const isUrgent = timeRemaining <= 120 && timeRemaining > 0;
 
   const loadAssessment = async (id: string) => {
-    const data = await assessmentService.getAssessmentById(id);
-    setAssessment(data);
-    setCurrentQuestionIndex(0);
-    setAnswers({});
-    setResult(null);
-    setHasExpired(false);
-    const totalSeconds = ((data as any).time_limit_minutes || 15) * 60;
-    setTimeRemaining(totalSeconds);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await assessmentService.getAssessmentById(id);
+      setAssessment(data);
+      setCurrentQuestionIndex(0);
+      setAnswers({});
+      setResult(null);
+      setHasExpired(false);
+      const totalSeconds = ((data as any).time_limit_minutes || 15) * 60;
+      setTimeRemaining(totalSeconds);
+    } catch (err: any) {
+      console.error('Failed to load assessment:', err);
+      setError(err?.message || 'Failed to prepare assessment.');
+      setAssessment(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Real-time countdown timer & graceful auto-submission on expiry
@@ -101,6 +115,8 @@ export const AssessmentContextProvider: React.FC<{ children: React.ReactNode }> 
   return (
     <AssessmentContext.Provider value={{
       assessment,
+      isLoading,
+      error,
       currentQuestionIndex,
       answers,
       result,

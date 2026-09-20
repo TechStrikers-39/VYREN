@@ -297,7 +297,31 @@
     "confirmSubmitMsg": "You have answered {{answered}} of {{total}} questions. Once submitted, your answers will be evaluated deterministically.",
     "submitBtn": "Submit Assessment",
     "submittingAssessment": "Grading answers and recalibrating competency dossier...",
-    "urgentTimeNotice": "Under 5 minutes remaining. Ensure all questions are addressed."
+    "urgentTimeNotice": "Under 5 minutes remaining. Ensure all questions are addressed.",
+    "prepBadge": "DIAGNOSTIC PREPARATION",
+    "prepHeading": "Preparing Your Competency Diagnostic",
+    "prepPrimaryCopy": "VYREN is tailoring your assessment to your professional context.",
+    "prepSecondaryCopy": "Your profile helps determine what the diagnostic should measure. Your responses determine your measured competency.",
+    "prepSeqContext": "Professional Context",
+    "prepSeqContextDesc": "Calibrated to your cadre & division",
+    "prepSeqCoverage": "Competency Coverage",
+    "prepSeqCoverageDesc": "4 core national framework domains",
+    "prepSeqScenarios": "Applied Scenarios",
+    "prepSeqScenariosDesc": "Realistic administrative challenges",
+    "prepSeqValidation": "Quality Validation",
+    "prepSeqValidationDesc": "Deterministic integrity & key check",
+    "prepFactQuestions": "18 Questions",
+    "prepFactQuestionsDesc": "Scenario-based diagnostic items",
+    "prepFactDomains": "4 Competency Domains",
+    "prepFactDomainsDesc": "Statistical Inference, Pipelines, MLOps, Governance",
+    "prepFactPersonalized": "Personalized to Your Profile",
+    "prepFactPersonalizedDesc": "Targeted to cadre & analytical toolstack",
+    "evaluationCalloutTitle": "How VYREN evaluates you",
+    "evaluationCalloutBody": "Your professional context helps VYREN select relevant competency areas and scenarios. Your performance on the diagnostic determines your measured competency level.",
+    "returnToDashboard": "Return to Dashboard",
+    "errorHeading": "Assessment preparation was interrupted",
+    "errorBody": "VYREN could not prepare your competency diagnostic right now.",
+    "retryBtn": "Retry Assessment Preparation"
   },
   "result": {
     "title": "Evaluation & Calibration Result",
@@ -408,5 +432,96 @@
     "secretInventoryTitle": "Environment Secret & Credential Audit",
     "refreshTelemetryBtn": "Refresh Telemetry",
     "serverVaultProtected": "Server-Side Vault Protected"
+  },
+  "helpGuide": {
+    "trigger": "Help & Guide",
+    "close": "Close",
+    "closeGuide": "Close Guide",
+    "badge": "YOUR VYREN JOURNEY",
+    "title": "How to Use VYREN",
+    "supportingText": "From professional context to demonstrated competency.",
+    "intro": "VYREN uses your professional context to personalize your competency diagnostic, identify measurable skill gaps, recommend relevant learning, and continuously update your competency profile as you demonstrate new capabilities.",
+    "journey": {
+      "updatedJourney": "Updated journey",
+      "importantDistinction": "Important distinction:",
+      "step1": {
+        "badge": "01 — CREATE YOUR PROFILE",
+        "title": "Create your profile",
+        "desc": "Tell VYREN about your role, department, responsibilities, tools, experience and learning goals.",
+        "distinction": "This information provides professional context for personalization. It does NOT by itself establish your measured competency."
+      },
+      "step2": {
+        "badge": "02 — TAKE YOUR COMPETENCY DIAGNOSTIC",
+        "title": "Take your competency diagnostic",
+        "desc": "Complete your personalized baseline assessment. VYREN uses your professional context to determine which competencies and difficulty levels the diagnostic should target.",
+        "distinction": "The diagnostic measures demonstrated performance."
+      },
+      "step3": {
+        "badge": "03 — UNDERSTAND YOUR SKILL GAPS",
+        "title": "Understand your skill gaps",
+        "desc": "Your assessment responses are evaluated using VYREN's deterministic competency model to identify measured competency levels and priority gaps against the requirements associated with your role."
+      },
+      "step4": {
+        "badge": "04 — FOLLOW YOUR PERSONALIZED LEARNING PATH",
+        "title": "Follow your personalized learning path",
+        "desc": "VYREN recommends relevant learning based on your identified competency gaps, role requirements and available learning resources, including relevant iGOT Karmayogi resources where available."
+      },
+      "step5": {
+        "badge": "05 — LEARN & ASSESS",
+        "title": "Learn & assess",
+        "desc": "Complete assigned learning activities and demonstrate your knowledge through assessments and quizzes where applicable.",
+        "distinction": "Completing a course alone does not automatically establish mastery. Demonstrated performance matters."
+      },
+      "step6": {
+        "badge": "06 — RECALIBRATE & IMPROVE",
+        "title": "Recalibrate & improve",
+        "desc": "As you demonstrate new knowledge and skills through subsequent assessment performance, VYREN updates your competency profile and can refine future learning recommendations."
+      }
+    },
+    "faq": {
+      "eyebrow": "COMMON QUESTIONS",
+      "title": "Frequently Asked Questions",
+      "subtitle": "A quick guide to how VYREN measures competency, recommends learning and tracks progress.",
+      "items": {
+        "q1": {
+          "question": "What is VYREN?",
+          "answer": "VYREN is a competency intelligence platform that helps identify workforce skill gaps, recommend relevant learning and track competency development over time."
+        },
+        "q2": {
+          "question": "Why does VYREN ask about my role and responsibilities?",
+          "answer": "Your professional context helps VYREN understand which competencies are relevant to your work and personalize your diagnostic and learning journey."
+        },
+        "q3": {
+          "question": "Does my self-reported experience determine my competency level?",
+          "answer": "No. Self-reported experience provides contextual information and helps calibrate assessment difficulty. Your measured competency is determined by demonstrated performance."
+        },
+        "q4": {
+          "question": "How is my competency score calculated?",
+          "answer": "Your assessment responses are evaluated using VYREN's deterministic competency model. Scores are calculated from demonstrated performance across competency-linked assessment items."
+        },
+        "q5": {
+          "question": "Why did VYREN recommend a particular course?",
+          "answer": "Recommendations are based on identified competency gaps, required competency levels for your role and relevant learning resources available through the platform."
+        },
+        "q6": {
+          "question": "What is iGOT Karmayogi?",
+          "answer": "iGOT Karmayogi is the Government of India's learning ecosystem. VYREN can use relevant iGOT learning resources as part of personalized learning recommendations."
+        },
+        "q7": {
+          "question": "Will my competency level change after I complete a course?",
+          "answer": "Learning completion itself does not automatically prove mastery. VYREN uses subsequent demonstrated assessment performance to recalibrate your competency profile."
+        },
+        "q8": {
+          "question": "Can I retake an assessment?",
+          "answer": "This depends on the assessment and workflow configured by your organization. When reassessment is available, VYREN can use new demonstrated performance to update your competency profile."
+        }
+      }
+    },
+    "cta": {
+      "subtitle": "Ready to begin?",
+      "title": "Explore your competency journey with VYREN.",
+      "getStarted": "Get Started",
+      "closeGuide": "Close Guide"
+    }
   }
 }

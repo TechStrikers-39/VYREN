@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import VyrenLogo from '../brand/VyrenLogo';
 import { useTranslation } from '@/i18n';
+import { HelpGuideOverlay } from '../help/HelpGuideOverlay';
 
 export const Footer: React.FC = () => {
   const { t } = useTranslation();
+  const [isHelpGuideOpen, setIsHelpGuideOpen] = useState(false);
+  const helpGuideTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <footer className="w-full bg-surface-alt border-t border-border mt-auto">
@@ -30,6 +33,14 @@ export const Footer: React.FC = () => {
             <a className="hover:text-primary-navy transition-colors" href="#">
               Accessibility (WCAG AA)
             </a>
+            <button
+              ref={helpGuideTriggerRef}
+              type="button"
+              onClick={() => setIsHelpGuideOpen(true)}
+              className="hover:text-primary-navy transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary-navy rounded text-left font-medium"
+            >
+              {t('helpGuide.trigger', {}, 'Help & Guide')}
+            </button>
           </nav>
         </div>
 
@@ -40,6 +51,16 @@ export const Footer: React.FC = () => {
           </p>
         </div>
       </div>
+
+      <HelpGuideOverlay
+        isOpen={isHelpGuideOpen}
+        onClose={() => {
+          setIsHelpGuideOpen(false);
+          helpGuideTriggerRef.current?.focus();
+        }}
+        triggerRef={helpGuideTriggerRef}
+      />
     </footer>
   );
 };
+
