@@ -98,7 +98,7 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-surface-alt flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-surface-alt flex flex-col justify-center pt-20 pb-12 sm:pt-20 sm:pb-16 md:pt-10 md:pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background Technical GridScan Layer */}
       <GridScan
         linesColor="#1B3A6B"

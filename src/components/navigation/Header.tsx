@@ -6,17 +6,22 @@ import { ROUTES } from '@/constants/routes';
 import { useTranslation } from '@/i18n';
 import LanguageSelector from '@/components/ui/LanguageSelector';
 import LandingNavbar from './LandingNavbar';
+import AuthHeader from './AuthHeader';
 
 export const Header: React.FC = () => {
   const location = useLocation();
-  const isLanding = location.pathname === '/' || location.pathname === ROUTES.PUBLIC.HOME;
+  const { user, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
 
+  const isLanding = location.pathname === '/' || location.pathname === ROUTES.PUBLIC.HOME;
   if (isLanding) {
     return <LandingNavbar />;
   }
 
-  const { user, isAuthenticated } = useAuth();
-  const { t } = useTranslation();
+  const isLoginPage = location.pathname === ROUTES.AUTH.LOGIN || location.pathname === '/auth/login';
+  if (isLoginPage) {
+    return <AuthHeader />;
+  }
 
   const getWorkspaceRoute = () => {
     if (!user) return ROUTES.AUTH.LOGIN;
