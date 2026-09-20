@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from typing import List
 
 from app.core.dependencies import get_current_user
@@ -55,6 +55,7 @@ async def update_profile(
 )
 async def submit_onboarding(
     req: LearnerOnboardingRequest,
+    background_tasks: BackgroundTasks,
     current_user: dict = Depends(get_current_user),
 ):
     """
@@ -63,8 +64,17 @@ async def submit_onboarding(
     Sets onboarding_completed = true.
     IDOR protected — scoped strictly to current user.
     """
+    from app.services.assessment_orchestrator import AssessmentOrchestrationService
+
     user_id = current_user["id"]
     updated_profile = UserRepository.submit_onboarding(user_id, req.model_dump())
+
+    # Pre-generate personalized baseline assessment in the background
+    background_tasks.add_task(
+        AssessmentOrchestrationService.get_or_create_personalized_assessment,
+        user_id=user_id,
+    )
+
     return UserProfileResponse(**updated_profile)
 
 
@@ -127,4 +137,27 @@ async def get_learning_path(current_user: dict = Depends(get_current_user)):
     user_id = current_user["id"]
     lp = CourseRepository.get_learning_path(user_id)
     return LearningPathResponse(**lp)
+
+
+@router.post(
+    "/demo-reset",
+    summary="Reset demo learner state to fresh un-onboarded baseline",
+)
+async def reset_demo_learner(
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Dedicated endpoint to reset demo learner account (alex.vance@gmail.com).
+    Strictly verifies identity: requires BOTH demo UUID and demo email.
+    Clears assessment instances, results, scores, gaps, recommendations,
+    enrollments, and resets onboarding state.
+    Returns HTTP 403 for any other user.
+    """
+    from app.services.demo_service import DemoResetService
+
+    return await DemoResetService.reset_demo_learner(
+        user_id=current_user["id"],
+        email=current_user.get("email", ""),
+    )
+
 

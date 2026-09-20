@@ -27,6 +27,7 @@ interface AuthContextType {
     target_competencies?: string[];
   }) => Promise<User>;
   setUserProfile: (user: User) => void;
+  resetDemo: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -109,6 +110,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(updated);
   };
 
+  const resetDemo = async () => {
+    setIsLoading(true);
+    try {
+      await authService.resetDemoLearner();
+      const fresh = await authService.getCurrentUser();
+      setUser(fresh);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async () => {
     await authService.logout();
     setUser(null);
@@ -126,6 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         handleOAuthToken,
         submitOnboarding,
         setUserProfile,
+        resetDemo,
         logout,
       }}
     >

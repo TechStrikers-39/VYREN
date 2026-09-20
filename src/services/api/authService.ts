@@ -96,6 +96,13 @@ export const authService = {
     return mapUser(res);
   },
 
+  async resetDemoLearner(): Promise<{ status: string; onboarding_completed: boolean }> {
+    const res = await apiClient<any>('/learner/demo-reset', {
+      method: 'POST',
+    });
+    return res;
+  },
+
   async logout(): Promise<void> {
     try {
       await apiClient('/auth/logout', { method: 'POST' });
