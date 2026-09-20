@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import time
 from typing import Any, Dict, List, Optional
 from app.repositories.instance_repo import AssessmentInstanceRepository
 from app.services.ai_assistant import AIAssistantService
@@ -8,11 +10,19 @@ from app.utils.supabase_client import get_supabase
 
 logger = logging.getLogger(__name__)
 
+# This registry provides per-user concurrency protection within the
+# current single-process application runtime. Persisted Supabase
+# assessment instances remain the source of truth across restarts.
+_IN_FLIGHT_GENERATIONS: Dict[str, asyncio.Task] = {}
+_REGISTRY_LOCK = asyncio.Lock()
+
+
 class AssessmentOrchestrationService:
     """
     Coordinates end-to-end delivery of personalized baseline assessments.
     Enforces the core rule: exactly 18 items per assessment instance.
     Prevents regeneration on page refresh by returning active instances.
+    Guarantees concurrency protection for background/foreground generation.
     """
 
     @classmethod
@@ -37,8 +47,9 @@ class AssessmentOrchestrationService:
         """
         Main entry point for learners starting or resuming their baseline assessment.
         Returns the assessment instance with exactly 18 items (correct_index excluded).
+        Guards against concurrent generation using a per-user in-flight registry.
         """
-        # 1. Check for existing active instance (Zero regeneration on page refresh)
+        # 1. Fast path: Check for existing active instance (Zero regeneration on page refresh)
         if not force_regenerate:
             existing_instance = AssessmentInstanceRepository.get_active_instance(user_id)
             if existing_instance:
@@ -59,14 +70,82 @@ class AssessmentOrchestrationService:
                         "blueprint": existing_instance.get("blueprint"),
                     }
 
-        # 2. Build deterministic blueprint from learner onboarding context
+        # 2. Concurrency guard: atomically check or register in-flight generation task
+        task: asyncio.Task
+        async with _REGISTRY_LOCK:
+            # Double-check if instance became active while waiting for lock
+            if not force_regenerate:
+                existing_instance = AssessmentInstanceRepository.get_active_instance(user_id)
+                if existing_instance:
+                    instance_id = existing_instance["id"]
+                    items = AssessmentInstanceRepository.get_instance_items_for_learner(instance_id)
+                    if len(items) == FINAL_ASSESSMENT_SIZE:
+                        logger.info(f"[Orchestrator] Resuming active assessment instance {instance_id} for user {user_id}")
+                        return {
+                            "id": instance_id,
+                            "title": "VYREN Personalized Baseline Skill Assessment",
+                            "description": "Scenario-based diagnostic evaluation calibrated to your cadre profile and analytical toolstack.",
+                            "version": "2.0-personalized",
+                            "time_limit_minutes": existing_instance.get("time_limit_minutes", 20),
+                            "generation_mode": existing_instance.get("generation_mode", "ai_personalized"),
+                            "status": existing_instance.get("status", "ready"),
+                            "total_items": len(items),
+                            "items": items,
+                            "blueprint": existing_instance.get("blueprint"),
+                        }
+
+            if user_id in _IN_FLIGHT_GENERATIONS:
+                logger.info(f"assessment_pregeneration_reused_inflight: user_id={user_id}")
+                task = _IN_FLIGHT_GENERATIONS[user_id]
+            else:
+                task = asyncio.create_task(
+                    cls._execute_generation(user_id=user_id, locale=locale)
+                )
+                _IN_FLIGHT_GENERATIONS[user_id] = task
+
+        # 3. Await generation (both owner and concurrent joiners await the same task)
+        return await task
+
+    @classmethod
+    async def _execute_generation(cls, user_id: str, locale: str = "en") -> Dict[str, Any]:
+        """
+        Executes personalized assessment generation and lifecycle persistence.
+        Guarantees cleanup of the in-flight registry even on failure.
+        """
+        start_time = time.monotonic()
+        logger.info(f"assessment_pregeneration_started: user_id={user_id}")
+        try:
+            result = await cls._generate_and_persist(user_id=user_id, locale=locale)
+            duration = round(time.monotonic() - start_time, 3)
+            logger.info(
+                f"assessment_pregeneration_completed: user_id={user_id} "
+                f"instance_id={result.get('id')} duration_seconds={duration}"
+            )
+            return result
+        except Exception as exc:
+            duration = round(time.monotonic() - start_time, 3)
+            logger.error(
+                f"assessment_pregeneration_failed: user_id={user_id} duration_seconds={duration} error={str(exc)}"
+            )
+            raise
+        finally:
+            async with _REGISTRY_LOCK:
+                _IN_FLIGHT_GENERATIONS.pop(user_id, None)
+
+    @classmethod
+    async def _generate_and_persist(cls, user_id: str, locale: str = "en") -> Dict[str, Any]:
+        """
+        Generates 18 personalized assessment items, validates quality,
+        and creates an immutable assessment instance in Supabase / repository.
+        """
+        # 1. Build deterministic blueprint from learner onboarding context
         blueprint = ContextTargetingEngine.build_blueprint(user_id=user_id, locale=locale)
         bp_dict = blueprint.model_dump()
 
-        # 3. Retrieve clean domain anchor pool
+        # 2. Retrieve clean domain anchor pool
         anchors = cls.get_clean_anchors()
 
-        # 4. Generate candidate questions via Gemini provider
+        # 3. Generate candidate questions via Gemini provider
         candidates: List[dict] = []
         gen_mode = "ai_personalized"
         model_used = "gemini-3.8-flash"
@@ -86,7 +165,7 @@ class AssessmentOrchestrationService:
             gen_mode = "anchor_padded"
             candidates = []
 
-        # 5. Assemble final 18 items using BlueprintSelectionEngine
+        # 4. Assemble final 18 items using BlueprintSelectionEngine
         final_18_raw = BlueprintSelectionEngine.select_final_18(
             blueprint=blueprint,
             anchor_pool=anchors,
@@ -102,7 +181,7 @@ class AssessmentOrchestrationService:
         if not has_generated:
             gen_mode = "anchor_padded"
 
-        # 6. Persist immutable assessment instance
+        # 5. Persist immutable assessment instance
         instance = AssessmentInstanceRepository.create_instance(
             user_id=user_id,
             blueprint=bp_dict,
