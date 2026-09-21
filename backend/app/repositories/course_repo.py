@@ -365,7 +365,7 @@ class CourseRepository:
                     "status": step_status,
                     "description": r.get("description")
                     or f"Curated curriculum targeting measured skill gap in {comp_name}.",
-                    "link": f"/learner/courses/{cid}",
+                    "link": f"/learner/course/{cid}",
                     "action_text": action_text,
                     "course_id": cid,
                     "module_id": None,

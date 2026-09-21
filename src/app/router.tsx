@@ -59,6 +59,7 @@ const router = createBrowserRouter([
           { path: 'dashboard', element: <LearnerDashboardPage /> },
           { path: 'learning-path', element: <LearningPathPage /> },
           { path: 'course/:courseId', element: <CourseDetailPage /> },
+          { path: 'courses/:courseId', element: <CourseDetailPage /> },
           { path: 'assessment/:assessmentId', element: <AssessmentPage /> },
           { path: 'assessment/:assessmentId/result', element: <AssessmentResultPage /> },
           { path: 'profile', element: <ProfilePage /> },
