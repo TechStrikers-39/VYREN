@@ -33,6 +33,10 @@ export const courseService = {
         level: `Level ${c.level}`,
         duration: `${c.duration_minutes} min`,
         competenciesCovered: c.competencies_covered || [],
+        provider: c.provider || 'iGOT Karmayogi Bharat / NSSTA',
+        external_id: c.external_id || null,
+        external_url: c.external_url || null,
+        integration_mode: c.integration_mode || (c.external_url ? 'REAL / SUNBIRD' : 'FALLBACK / LOCAL'),
         totalModules: c.modules?.length || 0,
         completedModules: 0,
         lessons: (c.modules || []).map((m: any) => ({

@@ -100,6 +100,10 @@ export interface Course {
   duration: string;
   thumbnail?: string;
   competenciesCovered: string[];
+  provider?: string | null;
+  external_id?: string | null;
+  external_url?: string | null;
+  integration_mode?: string | null;
 }
 
 export interface Question {

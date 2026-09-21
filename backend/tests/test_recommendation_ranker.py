@@ -17,6 +17,7 @@ import unittest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from app.repositories.course_repo import CourseRepository
 from app.services.recommendation_ranker import (
     rank_gaps_for_recommendation,
     build_course_search_query,
@@ -228,6 +229,127 @@ class TestCourseSearchQueryBuilder(unittest.TestCase):
         self.assertNotIn("user-secret-12345", query)
         self.assertNotIn("private.officer@gov.in", query)
         self.assertNotIn("secretpassword", query)
+
+
+class TestCourseRepositoryDbDurability(unittest.TestCase):
+
+    def setUp(self):
+        from app.repositories.course_repo import CourseRepository
+        CourseRepository._IGOT_COURSE_METADATA_CACHE.clear()
+
+    @unittest.mock.patch("app.repositories.course_repo.get_supabase")
+    def test_get_course_detail_reads_db_external_metadata_without_cache(self, mock_get_supabase):
+        from app.repositories.course_repo import CourseRepository
+
+        mock_supabase = unittest.mock.MagicMock()
+        mock_get_supabase.return_value = mock_supabase
+
+        db_course = {
+            "id": "b0100000-0000-0000-0000-000000000001",
+            "title": "Data Pipeline Design: Enterprise Patterns",
+            "is_active": True,
+            "external_id": "do_113812384910298112115",
+            "external_url": "https://portal.igotkarmayogi.gov.in/public/toc/do_113812384910298112115/overview",
+            "provider": "iGOT Karmayogi Bharat / NSSTA",
+        }
+        mock_supabase.table().select().eq().eq().single().execute.return_value.data = db_course
+        mock_supabase.table().select().eq().order().execute.return_value.data = [
+            {"id": "mod-1", "title": "Module 1", "order_index": 0}
+        ]
+
+        # In-memory cache is empty
+        self.assertEqual(CourseRepository._IGOT_COURSE_METADATA_CACHE, {})
+
+        detail = CourseRepository.get_course_detail("b0100000-0000-0000-0000-000000000001")
+        self.assertIsNotNone(detail)
+        self.assertEqual(detail["external_id"], "do_113812384910298112115")
+        self.assertEqual(
+            detail["external_url"],
+            "https://portal.igotkarmayogi.gov.in/public/toc/do_113812384910298112115/overview",
+        )
+        self.assertEqual(detail["provider"], "iGOT Karmayogi Bharat / NSSTA")
+        self.assertEqual(detail["integration_mode"], "REAL / SUNBIRD")
+
+    @unittest.mock.patch("app.repositories.course_repo.get_supabase")
+    def test_unforced_local_course_metadata(self, mock_get_supabase):
+        from app.repositories.course_repo import CourseRepository
+
+        mock_supabase = unittest.mock.MagicMock()
+        mock_get_supabase.return_value = mock_supabase
+
+        db_course = {
+            "id": "c0100000-0000-0000-0000-000000000099",
+            "title": "Local Custom Course",
+            "is_active": True,
+            "external_id": None,
+            "external_url": None,
+            "provider": None,
+        }
+        mock_supabase.table().select().eq().eq().single().execute.return_value.data = db_course
+        mock_supabase.table().select().eq().order().execute.return_value.data = []
+
+        detail = CourseRepository.get_course_detail("c0100000-0000-0000-0000-000000000099")
+        self.assertIsNotNone(detail)
+        self.assertIsNone(detail["external_id"])
+        self.assertIsNone(detail["external_url"])
+        self.assertIsNone(detail["provider"])
+        self.assertEqual(detail["integration_mode"], "FALLBACK / LOCAL")
+
+    @unittest.mock.patch("app.repositories.course_repo.get_supabase")
+    @unittest.mock.patch.object(CourseRepository, "enroll_user")
+    @unittest.mock.patch.object(CourseRepository, "get_course_detail")
+    def test_complete_module_does_not_mutate_competency_scores(
+        self, mock_get_detail, mock_enroll, mock_get_supabase
+    ):
+        from app.repositories.course_repo import CourseRepository
+
+        mock_get_detail.return_value = {
+            "id": "b0100000-0000-0000-0000-000000000001",
+            "modules": [{"id": "mod-1", "title": "Module 1", "competency_id": "comp-1"}],
+        }
+        mock_enroll.return_value = {
+            "id": "enr-1",
+            "completed_modules": [],
+        }
+        mock_supabase = unittest.mock.MagicMock()
+        mock_get_supabase.return_value = mock_supabase
+
+        result = CourseRepository.complete_module(
+            user_id="user1",
+            course_id="b0100000-0000-0000-0000-000000000001",
+            module_id="mod-1",
+        )
+
+        self.assertEqual(result["recalibrated_score"], None)
+        self.assertEqual(result["recalibrated_level"], None)
+        self.assertEqual(result["updated_gap_priority"], None)
+
+    @unittest.mock.patch("app.repositories.course_repo.get_supabase")
+    def test_upsert_normalized_course_includes_external_metadata(self, mock_get_supabase):
+        from app.repositories.course_repo import CourseRepository
+
+        mock_supabase = unittest.mock.MagicMock()
+        mock_get_supabase.return_value = mock_supabase
+
+        course_data = {
+            "id": "test-crs-1",
+            "title": "Test Upsert Course",
+            "external_id": "do_test_123",
+            "external_url": "https://portal.igotkarmayogi.gov.in/public/toc/do_test_123/overview",
+            "provider": "iGOT Karmayogi Bharat",
+        }
+
+        CourseRepository.upsert_normalized_course(course_data)
+
+        # Check payload passed to Supabase upsert
+        mock_supabase.table("courses").upsert.assert_called()
+        upsert_call_args = mock_supabase.table("courses").upsert.call_args[0][0]
+        self.assertEqual(upsert_call_args["external_id"], "do_test_123")
+        self.assertEqual(
+            upsert_call_args["external_url"],
+            "https://portal.igotkarmayogi.gov.in/public/toc/do_test_123/overview",
+        )
+        self.assertEqual(upsert_call_args["provider"], "iGOT Karmayogi Bharat")
 
 
 if __name__ == "__main__":

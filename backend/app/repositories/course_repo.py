@@ -9,6 +9,7 @@ from app.utils.supabase_client import get_supabase
 
 class CourseRepository:
     DEFAULT_COURSE_ID = "b0100000-0000-0000-0000-000000000001"
+    _IGOT_COURSE_METADATA_CACHE: dict = {}
 
     @classmethod
     def _normalize_id(cls, cid: str) -> str:
@@ -52,6 +53,21 @@ class CourseRepository:
             .execute()
         )
         course["modules"] = modules_res.data or []
+
+        # Enrich with verified external iGOT metadata if available in cache or course record
+        meta = cls._IGOT_COURSE_METADATA_CACHE.get(normalized_id) or {}
+        ext_id = course.get("external_id") or meta.get("external_id")
+        ext_url = course.get("external_url") or meta.get("external_url")
+        provider = course.get("provider") or meta.get("provider") or (
+            "iGOT Karmayogi Bharat / NSSTA" if ext_url else None
+        )
+        integration_mode = meta.get("integration_mode") or (
+            "REAL / SUNBIRD" if ext_url else "FALLBACK / LOCAL"
+        )
+        course["external_id"] = ext_id
+        course["external_url"] = ext_url
+        course["provider"] = provider
+        course["integration_mode"] = integration_mode
         return course
 
     @classmethod
@@ -76,7 +92,7 @@ class CourseRepository:
             .insert(
                 {
                     "user_id": user_id,
-                    "course_id": course_id,
+                    "course_id": normalized_id,
                     "progress_percentage": 0.0,
                     "completed_modules": [],
                     "status": "enrolled",
@@ -121,7 +137,8 @@ class CourseRepository:
         status_val = "completed" if progress_percentage >= 100.0 else "in_progress"
         now_iso = datetime.now(timezone.utc).isoformat()
 
-        # Update enrollment
+        # Update enrollment tracking ONLY (does NOT alter competency_scores or skill_gaps)
+        # Governed by: "Learning completion = learning evidence; Competency improvement = assessment evidence"
         update_data = {
             "completed_modules": completed_modules,
             "progress_percentage": progress_percentage,
@@ -134,85 +151,17 @@ class CourseRepository:
             "id", enrollment["id"]
         ).execute()
 
-        # 3. Recalibrate competency score & gap if module has a target competency_id
         recal_comp_id = target_module.get("competency_id")
-        recal_score = None
-        recal_level = None
-        updated_priority = None
-
-        if recal_comp_id:
-            recal_comp_id = str(recal_comp_id)
-
-            # Fetch current score or baseline
-            score_res = (
-                supabase.table("competency_scores")
-                .select("*")
-                .eq("user_id", user_id)
-                .eq("competency_id", recal_comp_id)
-                .execute()
-            )
-
-            current_score = (
-                float(score_res.data[0]["score"])
-                if (score_res.data and score_res.data[0].get("score") is not None)
-                else 40.0
-            )
-
-            # Recalibration logic: learning module completion boosts score by +25 points up to 88%
-            new_score = min(88.0, round(current_score + 25.0, 2))
-            new_level = convert_score_to_level(new_score)
-
-            supabase.table("competency_scores").upsert(
-                {
-                    "user_id": user_id,
-                    "competency_id": recal_comp_id,
-                    "score": new_score,
-                    "measured_level": new_level,
-                    "confidence": 0.90,
-                    "last_assessed_at": now_iso,
-                    "updated_at": now_iso,
-                },
-                on_conflict="user_id,competency_id",
-            ).execute()
-
-            # Recalculate gap
-            comp_res = (
-                supabase.table("competencies")
-                .select("required_level")
-                .eq("id", recal_comp_id)
-                .single()
-                .execute()
-            )
-            req_level = int(comp_res.data.get("required_level", 3)) if comp_res.data else 3
-
-            gap_res = GapEngine.compute_gap(new_level, req_level)
-            updated_priority = gap_res["priority"]
-
-            supabase.table("skill_gaps").upsert(
-                {
-                    "user_id": user_id,
-                    "competency_id": recal_comp_id,
-                    "current_level": gap_res["current_level"],
-                    "required_level": gap_res["required_level"],
-                    "gap_size": gap_res["gap_size"],
-                    "priority": updated_priority,
-                    "updated_at": now_iso,
-                },
-                on_conflict="user_id,competency_id",
-            ).execute()
-
-            recal_score = new_score
-            recal_level = new_level
 
         return {
-            "message": f"Module '{target_module['title']}' completed successfully.",
+            "message": f"Module '{target_module['title']}' recorded as learning activity evidence.",
             "module_id": str(module_id),
             "course_id": str(course_id),
             "progress_percentage": progress_percentage,
             "recalibrated_competency_id": recal_comp_id,
-            "recalibrated_score": recal_score,
-            "recalibrated_level": recal_level,
-            "updated_gap_priority": updated_priority,
+            "recalibrated_score": None,
+            "recalibrated_level": None,
+            "updated_gap_priority": None,
         }
 
     @classmethod
@@ -247,7 +196,19 @@ class CourseRepository:
             "duration_minutes": course_data.get("duration_minutes", 60),
             "competencies_covered": course_data.get("competencies_covered", []),
             "is_active": course_data.get("is_active", True),
+            "external_id": course_data.get("external_id"),
+            "external_url": course_data.get("external_url"),
+            "provider": course_data.get("provider"),
         }
+
+        # Cache external iGOT metadata in memory so get_course_detail can serve it
+        cls._IGOT_COURSE_METADATA_CACHE[cid] = {
+            "external_id": course_data.get("external_id"),
+            "external_url": course_data.get("external_url"),
+            "provider": course_data.get("provider", "iGOT Karmayogi Bharat / NSSTA"),
+            "integration_mode": course_data.get("integration_mode", "REAL / SUNBIRD"),
+        }
+
         res = supabase.table("courses").upsert(payload, on_conflict="id").execute()
 
         modules = course_data.get("modules", [])
