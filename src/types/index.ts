@@ -119,6 +119,18 @@ export interface Assessment {
   competenciesEvaluated: string[];
 }
 
+export interface TopRecommendation {
+  rank: number;
+  competency_name: string;
+  course_title: string;
+  course_id: string | null;
+  description: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  current_level: number;
+  required_level: number;
+  gap_size: number;
+}
+
 export interface AssessmentResult {
   id: string;
   assessmentId: string;
@@ -128,4 +140,5 @@ export interface AssessmentResult {
   competencyBreakdown: Record<string, any>;
   itemLog?: any[];
   resultingGaps?: any[];
+  topRecommendation?: TopRecommendation | null;
 }

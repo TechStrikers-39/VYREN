@@ -56,8 +56,10 @@ export const assessmentService = {
       competencyBreakdown: res.competency_breakdown || {},
       itemLog: res.item_log || [],
       resultingGaps: res.resulting_gaps || [],
+      topRecommendation: res.top_recommendation ?? null,
     };
   },
+
 
   async getLatestResult(assessmentId: string): Promise<AssessmentResult> {
     const res = await apiClient<any>(`/assessments/${assessmentId}/latest-result`);

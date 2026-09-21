@@ -375,28 +375,40 @@ class CourseRepository:
                     "integration_mode": "REAL / SUNBIRD",
                 })
         else:
-            default_c = cls.get_course_detail(cls.DEFAULT_COURSE_ID)
-            c_title = (
-                default_c.get("title", "Data Pipeline Design: Enterprise Patterns")
-                if default_c
-                else "Data Pipeline Design: Enterprise Patterns"
-            )
-            steps.append({
-                "id": "step-course-default",
-                "title": c_title,
-                "category": "Targeted iGOT Learning Module",
-                "duration": "90 mins",
-                "status": "in_progress" if has_assessment else "upcoming",
-                "description": "Foundational curriculum addressing data infrastructure and statistical pipeline reliability.",
-                "link": f"/learner/courses/{cls.DEFAULT_COURSE_ID}",
-                "action_text": "Continue Learning" if has_assessment else "Start Course",
-                "course_id": cls.DEFAULT_COURSE_ID,
-                "module_id": None,
-                "competency_id": "c1000000-0000-0000-0000-000000000002",
-                "competency_name": "Data Pipeline Design",
-                "provider": "iGOT Karmayogi Bharat (MoSPI Aligned)",
-                "integration_mode": "FALLBACK / LOCAL",
-            })
+            if not has_assessment:
+                steps.append({
+                    "id": "step-awaiting-assessment",
+                    "title": "Baseline Assessment Required",
+                    "category": "Diagnostic Assessment",
+                    "duration": "15 mins",
+                    "status": "upcoming",
+                    "description": "Complete your baseline competency diagnostic to generate a personalized iGOT learning path.",
+                    "link": "/learner/assessment/asm-001",
+                    "action_text": "Start Assessment",
+                    "course_id": None,
+                    "module_id": None,
+                    "competency_id": None,
+                    "competency_name": None,
+                    "provider": "VYREN Diagnostic Engine",
+                    "integration_mode": "STANDARD",
+                })
+            else:
+                steps.append({
+                    "id": "step-requirements-met",
+                    "title": "Cadre Competency Requirements Met",
+                    "category": "Competency Status",
+                    "duration": "N/A",
+                    "status": "completed",
+                    "description": "All evaluated competencies currently meet or exceed required cadre benchmarks.",
+                    "link": "/learner/dashboard",
+                    "action_text": "View Dashboard",
+                    "course_id": None,
+                    "module_id": None,
+                    "competency_id": None,
+                    "competency_name": None,
+                    "provider": "VYREN Competency Engine",
+                    "integration_mode": "STANDARD",
+                })
 
         has_completed_course = any(
             e.get("status") == "completed" for e in enrollments_by_course.values()

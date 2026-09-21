@@ -369,23 +369,41 @@ export const AssessmentResultPage: React.FC = () => {
           </div>
 
           <div className="p-4 rounded-xl bg-surface-alt border border-border space-y-3">
-            <p className="text-xs text-text-secondary leading-relaxed">
-              Your updated competency state has been recalculated in real time. The adaptive curriculum engine has adjusted your pathway to advance remaining cadre priorities.
-            </p>
+            {result.topRecommendation ? (
+              <>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  {result.topRecommendation.description ||
+                    'Your updated competency state has been recalculated in real time. The adaptive curriculum engine has adjusted your pathway to advance remaining cadre priorities.'}
+                </p>
 
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-              <div>
-                <span className="text-[10px] font-mono uppercase text-text-secondary block">Prioritized Pathway Step</span>
-                <strong className="text-sm font-bold text-text-primary">Data Pipeline Design: Enterprise Patterns</strong>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                  <div>
+                    <span className="text-[10px] font-mono uppercase text-text-secondary block">
+                      Prioritized Competency &bull; {result.topRecommendation.competency_name}
+                    </span>
+                    <strong className="text-sm font-bold text-text-primary">
+                      {result.topRecommendation.course_title}
+                    </strong>
+                  </div>
+                  <Link
+                    to={ROUTES.LEARNER.LEARNING_PATH}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary-navy hover:bg-primary-navy/90 text-on-primary text-xs font-bold transition shadow-xs shrink-0"
+                  >
+                    <span>Proceed to Learning Path</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-2 space-y-1">
+                <p className="text-xs font-bold text-text-primary">
+                  No learning recommendation is available yet.
+                </p>
+                <p className="text-xs text-text-secondary font-mono">
+                  Your competency results are available, but a matching learning module has not been found.
+                </p>
               </div>
-              <Link
-                to={ROUTES.LEARNER.LEARNING_PATH}
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary-navy hover:bg-primary-navy/90 text-on-primary text-xs font-bold transition shadow-xs shrink-0"
-              >
-                <span>Proceed to Learning Path</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+            )}
           </div>
         </div>
 

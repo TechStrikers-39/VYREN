@@ -51,7 +51,7 @@ export const LearningPathPage: React.FC = () => {
     };
   }, []);
 
-  // Safe fallback steps strictly aligned to VYREN 5-stage progression if backend array is empty
+  // Safe fallback steps if backend learning path array is unavailable
   const fallbackSteps: LearningPathStepData[] = [
     {
       id: 'step-diagnostic',
@@ -66,51 +66,17 @@ export const LearningPathPage: React.FC = () => {
       integration_mode: 'STANDARD',
     },
     {
-      id: 'step-course-default',
-      title: 'Data Pipeline Design: Enterprise Patterns',
-      category: 'Targeted iGOT Learning Module',
-      duration: '90 mins',
-      status: scores.length > 0 ? 'in_progress' : 'upcoming',
-      description: 'Foundational curriculum addressing data infrastructure, schema verification, and statistical pipeline reliability.',
-      link: ROUTES.LEARNER.COURSE('b0100000-0000-0000-0000-000000000001'),
-      action_text: 'Start Course',
-      provider: 'iGOT Karmayogi Bharat (MoSPI Aligned)',
-      integration_mode: 'LIVE / SUNBIRD',
-    },
-    {
-      id: 'step-core-survey',
-      title: 'Statistical Survey Quality Controls & Sampling',
-      category: 'Core Statistical Survey',
-      duration: '45 mins',
-      status: 'upcoming',
-      description: 'Official MoSPI standards for National Sample Surveys, price indices, and stratified estimator validation.',
-      link: '#',
-      action_text: 'Scheduled',
-      provider: 'MoSPI / NSSTA',
-      integration_mode: 'STANDARD',
-    },
-    {
-      id: 'step-skill-assessment',
-      title: 'Post-Module Capability Evaluation',
-      category: 'Skill Assessment',
-      duration: '20 mins',
-      status: 'upcoming',
-      description: 'Competency assessment evaluating score improvement and updating item-level mastery evidence.',
-      link: '#',
-      action_text: 'Scheduled',
-      provider: 'VYREN Assessment Studio',
-      integration_mode: 'STANDARD',
-    },
-    {
-      id: 'step-recalibration',
-      title: 'Deterministic Competency Recalibration',
-      category: 'Score Recalibration',
+      id: 'step-awaiting-recommendations',
+      title: 'Personalized Pathway Generation',
+      category: 'Pathway Generation',
       duration: 'Instantaneous',
-      status: 'upcoming',
-      description: 'Deterministic competency recalibration updating verified Level 0–4 scores and reducing recorded cadre gap deltas.',
-      link: '#',
-      action_text: 'Pending Validation',
-      provider: 'VYREN Competency Engine',
+      status: scores.length > 0 ? 'in_progress' : 'upcoming',
+      description: scores.length > 0
+        ? 'Your personalized learning path is being prepared based on your baseline assessment results.'
+        : 'Complete your baseline competency diagnostic to unlock personalized iGOT Karmayogi learning modules.',
+      link: ROUTES.LEARNER.ASSESSMENT('a1000000-0000-0000-0000-000000000001'),
+      action_text: scores.length > 0 ? 'View Assessment' : 'Start Diagnostic',
+      provider: 'VYREN Intelligence Engine',
       integration_mode: 'STANDARD',
     },
   ];

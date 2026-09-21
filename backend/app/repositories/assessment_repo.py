@@ -229,25 +229,64 @@ class AssessmentRepository:
                 on_conflict="user_id,competency_id",
             ).execute()
 
-        # 6. Generate context-aware, explainable recommendations for top gaps (Top 3–5)
-        active_gaps = [g for g in gap_matrix if g["priority"] in ("HIGH", "MEDIUM")]
-        active_gaps.sort(key=lambda x: (0 if x["priority"] == "HIGH" else 1, -x["gap_size"]))
-        top_gaps = active_gaps[:4]
-
+        # 6. Generate context-aware, explainable recommendations for top gaps
+        #    Uses deterministic RecommendationRanker (priority → gap size → confidence
+        #    → context relevance → stable competency_id).
+        from app.services.recommendation_ranker import (
+            rank_gaps_for_recommendation,
+            build_course_search_query,
+        )
         from app.services.igot_client import IGOTClientService
-        for gap in top_gaps:
+
+        # Pass competency_breakdown as scores (contains confidence per competency)
+        top_gaps = rank_gaps_for_recommendation(
+            gap_matrix=gap_matrix,
+            competency_scores=competency_breakdown,
+            profile=profile,
+        )[:4]
+
+        # Clear previous recommendations so the learning path reflects ONLY the
+        # current assessment result (no stale accumulation).
+        # NOTE: The recommendations table has NO unique(user_id, competency_id)
+        # constraint, so we delete-then-insert rather than relying on a DB upsert.
+        try:
+            supabase.table("recommendations").delete().eq("user_id", user_id).execute()
+            logger.info(
+                "recommendation_reset: user_id=%s assessment_id=%s cleared stale recommendations",
+                user_id, assessment_id,
+            )
+        except Exception as del_err:
+            logger.warning("recommendation_reset_failed: %s", del_err)
+
+        top_recommendation: dict | None = None
+
+        for rank_idx, gap in enumerate(top_gaps):
             comp_id = str(gap["competency_id"])
             comp_name = gap["competency_name"]
+
+            # Build a contextually enriched search query
+            search_query = build_course_search_query(
+                competency_name=comp_name,
+                profile=profile,
+            )
+            logger.info(
+                "igot_search: rank=%d competency=%s query=%r",
+                rank_idx + 1, comp_name, search_query,
+            )
 
             # Match with real iGOT / Sunbird search
             matched_course = None
             try:
-                igot_results = IGOTClientService.search_courses(query=comp_name)
+                igot_results = IGOTClientService.search_courses(query=search_query)
                 if igot_results:
                     top_igot = igot_results[0]
                     matched_course = CourseRepository.upsert_normalized_course(top_igot)
-            except Exception:
-                pass
+                    logger.info(
+                        "igot_course_selected: rank=%d competency=%s course=%s",
+                        rank_idx + 1, comp_name, top_igot.get("title", ""),
+                    )
+            except Exception as igot_err:
+                logger.warning("igot_search_failed: %s", igot_err)
 
             if not matched_course:
                 matched_course = CourseRepository.get_course_for_competency(comp_id)
@@ -262,7 +301,7 @@ class AssessmentRepository:
                 f"Curriculum sourced from iGOT Karmayogi Bharat."
             )
 
-            supabase.table("recommendations").upsert(
+            insert_res = supabase.table("recommendations").insert(
                 {
                     "user_id": user_id,
                     "competency_id": gap["competency_id"],
@@ -274,6 +313,20 @@ class AssessmentRepository:
                     "is_dismissed": False,
                 }
             ).execute()
+
+            # Capture the top recommendation for embedding in the result payload
+            if rank_idx == 0:
+                top_recommendation = {
+                    "rank": 1,
+                    "competency_name": comp_name,
+                    "course_title": course_title,
+                    "course_id": course_id,
+                    "description": rec_desc,
+                    "priority": gap["priority"],
+                    "current_level": gap["current_level"],
+                    "required_level": gap["required_level"],
+                    "gap_size": gap["gap_size"],
+                }
 
         # 7. Store Result Record with Full Evidence Vector
         result_payload = {
@@ -310,7 +363,10 @@ class AssessmentRepository:
             res_id = saved_result.get("id") or str(uuid.uuid4())
             AssessmentInstanceRepository.mark_instance_submitted(assessment_id, result_id=res_id)
 
-        return saved_result
+        # Embed top_recommendation into the API response so the result page
+        # can display the actual recommendation without a separate API call.
+        return dict(saved_result, top_recommendation=top_recommendation)
+
 
     @staticmethod
     def get_result(result_id: str, user_id: str) -> dict | None:
