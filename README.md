@@ -20,32 +20,52 @@
 ---
 
 ## Table of Contents
-1. [Overview](#1-overview)
-2. [Problem Statement](#2-problem-statement)
-3. [Solution](#3-solution)
-4. [Key Capabilities](#4-key-capabilities)
-5. [How VYREN Works](#5-how-vyren-works)
-6. [Core Intelligence Pipeline](#6-core-intelligence-pipeline)
-7. [User Roles](#7-user-roles)
-8. [Technical Architecture](#8-technical-architecture)
-9. [Technology Stack](#9-technology-stack)
-10. [iGOT Karmayogi Integration](#10-igot-karmayogi-integration)
-11. [AI + Deterministic Intelligence](#11-ai--deterministic-intelligence)
-12. [Personalized Diagnostic](#12-personalized-diagnostic)
-13. [Recommendation Engine](#13-recommendation-engine)
-14. [Document Intelligence & Grounded Context](#14-document-intelligence--grounded-context)
-15. [AI-Generated MCQs & Validation Pipeline](#15-ai-generated-mcqs--validation-pipeline)
-16. [Adaptive Learning Loop](#16-adaptive-learning-loop)
-17. [Security & Access Control](#17-security--access-control)
-18. [Project Structure](#18-project-structure)
-19. [Setup & Installation](#19-setup--installation)
-20. [Environment Variables](#20-environment-variables)
-21. [Running the Application](#21-running-the-application)
-22. [Testing & Validation](#22-testing--validation)
-23. [Demo Flow](#23-demo-flow)
-24. [Future Scope](#24-future-scope)
-25. [Team — Tech Strikers](#25-team--tech-strikers)
-26. [SIH 2026 & Institutional Alignment](#26-sih-2026--institutional-alignment)
+
+<div align="center">
+
+<a href="#1-overview">Overview</a> •
+<a href="#2-problem-statement">Problem Statement</a> •
+<a href="#3-solution">Solution</a> •
+<a href="#4-key-capabilities">Key Capabilities</a> •
+<a href="#5-how-vyren-works">How VYREN Works</a>
+
+<br/>
+
+<a href="#6-core-intelligence-pipeline">Core Intelligence Pipeline</a> •
+<a href="#7-user-roles">User Roles</a> •
+<a href="#8-technical-architecture">Technical Architecture</a> •
+<a href="#9-technology-stack">Technology Stack</a>
+
+<br/>
+
+<a href="#10-igot-karmayogi-integration">iGOT Karmayogi Integration</a> •
+<a href="#11-ai--deterministic-intelligence">AI + Deterministic Intelligence</a> •
+<a href="#12-personalized-diagnostic">Personalized Diagnostic</a> •
+<a href="#13-recommendation-engine">Recommendation Engine</a>
+
+<br/>
+
+<a href="#14-document-intelligence--grounded-context">Document Intelligence & Grounded Context</a> •
+<a href="#15-ai-generated-mcqs--validation-pipeline">AI-Generated MCQs & Validation Pipeline</a> •
+<a href="#16-adaptive-learning-loop">Adaptive Learning Loop</a> •
+<a href="#17-security--access-control">Security & Access Control</a>
+
+<br/>
+
+<a href="#18-project-structure">Project Structure</a> •
+<a href="#19-setup--installation">Setup & Installation</a> •
+<a href="#20-environment-variables">Environment Variables</a> •
+<a href="#21-running-the-application">Running the Application</a> •
+<a href="#22-testing--validation">Testing & Validation</a>
+
+<br/>
+
+<a href="#23-demo-flow">Demo Flow</a> •
+<a href="#24-future-scope">Future Scope</a> •
+<a href="#25-team--tech-strikers">Team — Tech Strikers</a> •
+<a href="#26-sih-2026--institutional-alignment">SIH 2026 & Institutional Alignment</a>
+
+</div>
 
 ---
 
