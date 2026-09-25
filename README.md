@@ -746,16 +746,7 @@ The following features represent planned roadmap extensions beyond the current f
 
 ## 25. Team — Tech Strikers
 
-Developed for **Smart India Hackathon 2026** by **Tech Strikers**:
-
-| Name | Role / Area | Institution |
-| :--- | :--- | :--- |
-| **Sarthak Deshpande** | Full Stack Architecture & Core Intelligence | Pillai College of Engineering, Pillai University |
-| **Sankalp Padyal** | Backend Systems & API Engineering | Pillai College of Engineering, Pillai University |
-| **Raina Singh** | Frontend Experience & Design Systems | Pillai College of Engineering, Pillai University |
-| **Prajwal Mote** | Assessment Engine & Evaluation Pipelines | Pillai College of Engineering, Pillai University |
-| **Aditya Mohape** | Integration & Data Engineering | Pillai College of Engineering, Pillai University |
-| **Prasad Kokare** | Quality Assurance & Testing Systems | Pillai College of Engineering, Pillai University |
+**Tech Strikers**
 
 ---
 
