@@ -20,6 +20,13 @@ function mapUser(u: any): User {
   };
 }
 
+export interface DemoStatusResponse {
+  is_demo: boolean;
+  has_existing_session: boolean;
+  onboarding_completed: boolean;
+  assessment_exists: boolean;
+}
+
 export const authService = {
   async getCurrentUser(): Promise<User> {
     const res = await apiClient<any>('/auth/me');
@@ -94,6 +101,10 @@ export const authService = {
       body: JSON.stringify(data),
     });
     return mapUser(res);
+  },
+
+  async getDemoStatus(): Promise<DemoStatusResponse> {
+    return apiClient<DemoStatusResponse>('/learner/demo-status');
   },
 
   async resetDemoLearner(): Promise<{ status: string; onboarding_completed: boolean }> {

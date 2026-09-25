@@ -139,6 +139,27 @@ async def get_learning_path(current_user: dict = Depends(get_current_user)):
     return LearningPathResponse(**lp)
 
 
+@router.get(
+    "/demo-status",
+    summary="Check demo learner session state and readiness",
+)
+async def get_demo_status(
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Dedicated endpoint to check demo learner session state.
+    Strictly derives identity from authenticated session.
+    Returns whether the user is the demo learner and whether an existing demo session exists.
+    For non-demo users, returns is_demo=False without leaking state.
+    """
+    from app.services.demo_service import DemoResetService
+
+    return await DemoResetService.get_demo_status(
+        user_id=current_user["id"],
+        email=current_user.get("email", ""),
+    )
+
+
 @router.post(
     "/demo-reset",
     summary="Reset demo learner state to fresh un-onboarded baseline",

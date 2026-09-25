@@ -5,7 +5,11 @@ import { useTranslation } from '@/i18n';
 import { ROUTES } from '@/constants/routes';
 import VyrenLogo from '@/components/brand/VyrenLogo';
 import GridScan from '@/components/ui/GridScan';
-import { Shield, GraduationCap, BarChart3, AlertCircle, Info, Lock, ArrowRight } from 'lucide-react';
+import { Shield, GraduationCap, BarChart3, AlertCircle, Info, Lock, ArrowRight, RefreshCw } from 'lucide-react';
+import { DEMO_LEARNER_ID, DEMO_LEARNER_EMAIL } from '@/constants/demo';
+import { authService } from '@/services/api/authService';
+import DemoSessionChoiceModal from '@/components/auth/DemoSessionChoiceModal';
+import { User } from '@/types';
 
 type PersonaType = 'learner' | 'trainer' | 'admin';
 
@@ -33,7 +37,7 @@ const PERSONA_CONFIG: Record<PersonaType, { label: string; icon: React.Component
 export const LoginPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, login, googleLogin, logout } = useAuth();
+  const { user, isAuthenticated, login, googleLogin, logout, resetDemo } = useAuth();
 
   const [selectedPersona, setSelectedPersona] = useState<PersonaType>('learner');
   const [email, setEmail] = useState('alex.vance@gmail.com');
@@ -41,6 +45,14 @@ export const LoginPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [roleMismatchNotice, setRoleMismatchNotice] = useState<string | null>(null);
+
+  // Demo session choice states
+  const [isCheckingDemoSession, setIsCheckingDemoSession] = useState(false);
+  const [showDemoChoiceModal, setShowDemoChoiceModal] = useState(false);
+  const [isResettingDemo, setIsResettingDemo] = useState(false);
+  const [demoResetError, setDemoResetError] = useState<string | null>(null);
+  const [demoStatusError, setDemoStatusError] = useState<string | null>(null);
+  const [pendingDemoUser, setPendingDemoUser] = useState<User | null>(null);
 
   const handlePersonaSelect = (persona: PersonaType) => {
     setSelectedPersona(persona);
@@ -62,16 +74,79 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const checkDemoSessionAndProceed = async (authenticatedUser: User) => {
+    setIsCheckingDemoSession(true);
+    setDemoStatusError(null);
+    setPendingDemoUser(authenticatedUser);
+    try {
+      const demoStatus = await authService.getDemoStatus();
+      if (demoStatus.is_demo && demoStatus.has_existing_session) {
+        // Existing demo session detected -> prompt user for choice
+        setShowDemoChoiceModal(true);
+      } else {
+        // Fresh demo state with no existing session -> route directly to 5-step onboarding
+        navigate(ROUTES.LEARNER.ONBOARDING, { replace: true });
+      }
+    } catch (err: any) {
+      console.error('[LoginPage] Demo status check failed:', err);
+      setDemoStatusError(
+        err?.message ||
+        t('auth.statusErrorDesc', {}, "We couldn't check the demo session. Please try again.")
+      );
+    } finally {
+      setIsCheckingDemoSession(false);
+    }
+  };
+
+  const handleResumeDemo = () => {
+    setShowDemoChoiceModal(false);
+    const targetUser = pendingDemoUser || user;
+    if (targetUser?.onboardingCompleted) {
+      navigate(ROUTES.LEARNER.DASHBOARD, { replace: true });
+    } else {
+      navigate(ROUTES.LEARNER.ONBOARDING, { replace: true });
+    }
+  };
+
+  const handleStartFreshDemo = async () => {
+    setIsResettingDemo(true);
+    setDemoResetError(null);
+    try {
+      await resetDemo();
+      setShowDemoChoiceModal(false);
+      navigate(ROUTES.LEARNER.ONBOARDING, { replace: true });
+    } catch (err: any) {
+      console.error('[LoginPage] Demo reset failed:', err);
+      setDemoResetError(
+        err?.message ||
+        t('auth.resetErrorDesc', {}, "We couldn't start a fresh demo. Your existing demo session has not been changed.")
+      );
+    } finally {
+      setIsResettingDemo(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     setRoleMismatchNotice(null);
+    setDemoStatusError(null);
     setIsSubmitting(true);
 
     try {
       const authenticatedUser = await login(email, password);
 
-      // Verify selected persona vs verified database role
+      // Check if this authenticated user is the designated demo learner
+      const isDemoLearner =
+        authenticatedUser.id === DEMO_LEARNER_ID &&
+        authenticatedUser.email?.trim().toLowerCase() === DEMO_LEARNER_EMAIL;
+
+      if (isDemoLearner) {
+        await checkDemoSessionAndProceed(authenticatedUser);
+        return;
+      }
+
+      // Normal user flow: verify selected persona vs verified database role
       if (authenticatedUser.role !== selectedPersona) {
         setRoleMismatchNotice(
           `Security Notice: You selected "${PERSONA_CONFIG[selectedPersona].label}", but your authenticated account is registered as "${authenticatedUser.role.toUpperCase()}". Redirecting to your authorized workspace...`
@@ -264,6 +339,27 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
 
+          {demoStatusError && (
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+                <span>{demoStatusError}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (pendingDemoUser || user) {
+                    checkDemoSessionAndProceed(pendingDemoUser || user!);
+                  }
+                }}
+                className="px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs flex items-center gap-1 shrink-0 transition cursor-pointer"
+              >
+                <RefreshCw className="w-3 h-3" />
+                <span>{t('auth.retryBtn', {}, 'Retry')}</span>
+              </button>
+            </div>
+          )}
+
           {/* Email & Password Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -299,11 +395,18 @@ export const LoginPage: React.FC = () => {
 
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full py-2.5 rounded-xl bg-primary-navy text-on-primary font-bold text-sm hover:bg-primary-navy/90 transition shadow-xs disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+              disabled={isSubmitting || isCheckingDemoSession}
+              className="w-full py-2.5 rounded-xl bg-primary-navy text-on-primary font-bold text-sm hover:bg-primary-navy/90 transition shadow-xs disabled:opacity-50 flex items-center justify-center gap-2 mt-2 cursor-pointer"
             >
-              {isSubmitting ? (
-                <span>{t('auth.authenticating')}</span>
+              {isSubmitting || isCheckingDemoSession ? (
+                <div className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>
+                    {isCheckingDemoSession
+                      ? t('auth.checkingSession', {}, 'Checking demo session...')
+                      : t('auth.authenticating')}
+                  </span>
+                </div>
               ) : (
                 <>
                   <span>{t('auth.authenticateBtn')}</span>
@@ -327,6 +430,16 @@ export const LoginPage: React.FC = () => {
           Protected by Government-Grade RBAC &bull; DPDP Act 2023 Compliance
         </div>
       </div>
+
+      {/* Demo Session Choice Modal (Exclusively for Designated Demo Learner) */}
+      <DemoSessionChoiceModal
+        isOpen={showDemoChoiceModal}
+        isResetting={isResettingDemo}
+        resetError={demoResetError}
+        onResume={handleResumeDemo}
+        onStartFresh={handleStartFreshDemo}
+        onDismissError={() => setDemoResetError(null)}
+      />
     </div>
   );
 };

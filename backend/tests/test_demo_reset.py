@@ -67,6 +67,9 @@ class MockTableQuery:
         self._filters.append(("in", col, vals))
         return self
 
+    def limit(self, count: int):
+        return self
+
     def _matches(self, row: dict) -> bool:
         for op, col, val in self._filters:
             if op == "eq" and row.get(col) != val:
@@ -706,6 +709,100 @@ class TestDemoReset(unittest.IsolatedAsyncioTestCase):
                 self.assertIn("prompt", item)
                 self.assertIn("options", item)
                 self.assertEqual(len(item["options"]), 4)
+
+    # --------------------------------------------------------------------------
+    # 24. Demo status reports existing session when data present
+    # --------------------------------------------------------------------------
+    async def test_24_demo_status_reports_existing_session(self):
+        """VERIFICATION 24: Demo status reports existing session when onboarding/instances exist."""
+        with mock.patch("app.services.demo_service.get_supabase", return_value=self.mock_client):
+            status = await DemoResetService.get_demo_status(
+                user_id=DEMO_USER_ID,
+                email=DEMO_USER_EMAIL,
+            )
+            self.assertTrue(status["is_demo"])
+            self.assertTrue(status["has_existing_session"])
+            self.assertTrue(status["onboarding_completed"])
+            self.assertTrue(status["assessment_exists"])
+
+    # --------------------------------------------------------------------------
+    # 25. Demo status reports no session after fresh reset
+    # --------------------------------------------------------------------------
+    async def test_25_demo_status_reports_no_session_after_reset(self):
+        """VERIFICATION 25: Demo status reports no existing session when state is reset."""
+        with mock.patch("app.services.demo_service.get_supabase", return_value=self.mock_client):
+            # First reset state
+            await DemoResetService.reset_demo_learner(
+                user_id=DEMO_USER_ID,
+                email=DEMO_USER_EMAIL,
+            )
+            status = await DemoResetService.get_demo_status(
+                user_id=DEMO_USER_ID,
+                email=DEMO_USER_EMAIL,
+            )
+            self.assertTrue(status["is_demo"])
+            self.assertFalse(status["has_existing_session"])
+            self.assertFalse(status["onboarding_completed"])
+            self.assertFalse(status["assessment_exists"])
+
+    # --------------------------------------------------------------------------
+    # 26. Non-demo user demo status returns is_demo=False
+    # --------------------------------------------------------------------------
+    async def test_26_non_demo_user_demo_status_returns_not_demo(self):
+        """VERIFICATION 26: Non-demo user cannot retrieve demo state; returns is_demo=False."""
+        status = await DemoResetService.get_demo_status(
+            user_id=self.other_user_id,
+            email=self.other_user_email,
+        )
+        self.assertFalse(status["is_demo"])
+        self.assertFalse(status["has_existing_session"])
+        self.assertFalse(status["onboarding_completed"])
+        self.assertFalse(status["assessment_exists"])
+
+    # --------------------------------------------------------------------------
+    # 27. GET /learner/demo-status endpoint returns status for demo user
+    # --------------------------------------------------------------------------
+    def test_27_get_demo_status_endpoint_for_demo_user(self):
+        """VERIFICATION 27: GET /learner/demo-status endpoint returns status for authenticated demo user."""
+        client = TestClient(app)
+        demo_user = {
+            "id": DEMO_USER_ID,
+            "email": DEMO_USER_EMAIL,
+            "role": "learner",
+        }
+        app.dependency_overrides[get_current_user] = lambda: demo_user
+        try:
+            with mock.patch("app.services.demo_service.get_supabase", return_value=self.mock_client):
+                response = client.get("/learner/demo-status")
+                self.assertEqual(response.status_code, 200)
+                data = response.json()
+                self.assertTrue(data["is_demo"])
+                self.assertTrue(data["has_existing_session"])
+                self.assertTrue(data["onboarding_completed"])
+                self.assertTrue(data["assessment_exists"])
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
+
+    # --------------------------------------------------------------------------
+    # 28. GET /learner/demo-status endpoint returns is_demo=False for normal learner
+    # --------------------------------------------------------------------------
+    def test_28_get_demo_status_endpoint_for_normal_learner(self):
+        """VERIFICATION 28: GET /learner/demo-status returns is_demo=False for non-demo users."""
+        client = TestClient(app)
+        other_user = {
+            "id": self.other_user_id,
+            "email": self.other_user_email,
+            "role": "learner",
+        }
+        app.dependency_overrides[get_current_user] = lambda: other_user
+        try:
+            response = client.get("/learner/demo-status")
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertFalse(data["is_demo"])
+            self.assertFalse(data["has_existing_session"])
+        finally:
+            app.dependency_overrides.pop(get_current_user, None)
 
 
 if __name__ == "__main__":
