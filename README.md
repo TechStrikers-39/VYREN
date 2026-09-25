@@ -1,8 +1,10 @@
-# VYREN
-### Competency Intelligence Platform
-> *"Turn Skills Into Intelligence."*
+<div align="center">
 
----
+<h1>VYREN</h1>
+<h3>Competency Intelligence Platform</h3>
+<p><em>"Turn Skills Into Intelligence."</em></p>
+
+<hr/>
 
 [![Smart India Hackathon 2026](https://img.shields.io/badge/SIH-2026-FF6F00?style=for-the-badge&logo=target&logoColor=white)](https://sih.gov.in)
 [![Ministry](https://img.shields.io/badge/MoSPI-Official%20Statistical%20System-003366?style=for-the-badge&logo=gov.uk&logoColor=white)](https://mospi.gov.in)
@@ -10,12 +12,16 @@
 [![Mission Karmayogi](https://img.shields.io/badge/Mission%20Karmayogi-CBC%20Aligned-16A34A?style=for-the-badge&logo=checkmarx&logoColor=white)](https://karmayogibharat.gov.in)
 [![Compliance](https://img.shields.io/badge/DPDP%20Act%202023-Compliant-059669?style=for-the-badge&logo=shield&logoColor=white)](#17-security--access-control)
 
+<br/>
+
 [![Tests](https://img.shields.io/badge/Tests-135%2F135%20Passing%20(14%20Subtests)-brightgreen?style=flat-square&logo=pytest&logoColor=white)](#22-testing--validation)
 [![Frontend](https://img.shields.io/badge/Frontend-React%2018%20%7C%20TypeScript%20%7C%20Vite%20%7C%20Tailwind-61DAFB?style=flat-square&logo=react&logoColor=black)](#9-technology-stack)
 [![Backend](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.11%20%7C%20Pydantic%20v2-009688?style=flat-square&logo=fastapi&logoColor=white)](#9-technology-stack)
 [![Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL%20%7C%20RLS-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](#9-technology-stack)
 [![AI Engine](https://img.shields.io/badge/AI%20Engine-Google%20Gemini%20API-4285F4?style=flat-square&logo=google-gemini&logoColor=white)](#11-ai--deterministic-intelligence)
 [![i18n](https://img.shields.io/badge/i18n-English%20%7C%20%E0%A4%B9%E0%A4%BF%E0%A4%A8%E0%A5%8D%E0%A4%A6%E0%A5%80%20%7C%20%E0%A4%AE%E0%A4%B0%E0%A4%BE%E0%A4%A0%E0%A5%80-8B5CF6?style=flat-square)](#4-key-capabilities)
+
+</div>
 
 ---
 
