@@ -275,3 +275,32 @@ def _get_competency_id_by_name(competency_name: str) -> str:
         "data governance": "c1000000-0000-0000-0000-000000000004",
     }
     return _NAME_TO_ID.get(name_lower, "")
+
+
+def get_tiered_search_queries(
+    competency_name: str,
+    profile: Optional[Dict[str, Any]] = None,
+) -> List[tuple[str, str]]:
+    """
+    Build ordered search query tiers for generic iGOT/Sunbird querying.
+
+    Tier 1: Contextually enriched query (competency + designation + tools).
+    Tier 2: Clean competency name fallback (e.g., "Data Pipeline Design").
+
+    Returns
+    -------
+    list of (tier_label, query_string) tuples in execution order.
+    Deduplicates if Tier 1 query is already identical to the clean competency name.
+    """
+    clean_comp = competency_name.strip()
+    tier1_query = build_course_search_query(competency_name, profile=profile).strip()
+
+    tiers: List[tuple[str, str]] = []
+    if tier1_query:
+        tiers.append(("Tier 1 (contextual)", tier1_query))
+
+    # Add Tier 2 fallback if Tier 1 is absent or different from clean competency name
+    if not tiers or tiers[0][1].lower() != clean_comp.lower():
+        tiers.append(("Tier 2 (competency-only)", clean_comp))
+
+    return tiers

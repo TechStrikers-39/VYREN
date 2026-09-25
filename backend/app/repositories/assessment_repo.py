@@ -235,6 +235,7 @@ class AssessmentRepository:
         from app.services.recommendation_ranker import (
             rank_gaps_for_recommendation,
             build_course_search_query,
+            get_tiered_search_queries,
         )
         from app.services.igot_client import IGOTClientService
 
@@ -264,31 +265,42 @@ class AssessmentRepository:
             comp_id = str(gap["competency_id"])
             comp_name = gap["competency_name"]
 
-            # Build a contextually enriched search query
-            search_query = build_course_search_query(
+            # Generic Tiered iGOT Search:
+            #   Tier 1: Contextually enriched query (competency + designation + tools)
+            #   Tier 2: Clean competency name fallback if Tier 1 yields 0 results
+            #   Tier 3: Local catalog fallback only if both Tier 1 and Tier 2 yield 0 results
+            matched_course = None
+            search_tiers = get_tiered_search_queries(
                 competency_name=comp_name,
                 profile=profile,
             )
-            logger.info(
-                "igot_search: rank=%d competency=%s query=%r",
-                rank_idx + 1, comp_name, search_query,
-            )
 
-            # Match with real iGOT / Sunbird search
-            matched_course = None
-            try:
-                igot_results = IGOTClientService.search_courses(query=search_query)
-                if igot_results:
-                    top_igot = igot_results[0]
-                    matched_course = CourseRepository.upsert_normalized_course(top_igot)
-                    logger.info(
-                        "igot_course_selected: rank=%d competency=%s course=%s",
-                        rank_idx + 1, comp_name, top_igot.get("title", ""),
-                    )
-            except Exception as igot_err:
-                logger.warning("igot_search_failed: %s", igot_err)
+            for tier_label, query_str in search_tiers:
+                logger.info(
+                    "igot_search_attempt: rank=%d competency=%s %s query=%r",
+                    rank_idx + 1, comp_name, tier_label, query_str,
+                )
+                try:
+                    igot_results = IGOTClientService.search_courses(query=query_str)
+                    if igot_results:
+                        top_igot = igot_results[0]
+                        matched_course = CourseRepository.upsert_normalized_course(top_igot)
+                        logger.info(
+                            "igot_course_selected: rank=%d competency=%s %s course=%s external_id=%s",
+                            rank_idx + 1, comp_name, tier_label,
+                            top_igot.get("title", ""), top_igot.get("external_id", ""),
+                        )
+                        # First successful tier wins — do not execute subsequent fallback tiers
+                        break
+                except Exception as igot_err:
+                    logger.warning("igot_search_failed on %s: %s", tier_label, igot_err)
 
+            # Tier 3: Local catalog fallback only if both Tier 1 and Tier 2 yielded no result
             if not matched_course:
+                logger.info(
+                    "igot_fallback_local: rank=%d competency=%s falling back to local catalog",
+                    rank_idx + 1, comp_name,
+                )
                 matched_course = CourseRepository.get_course_for_competency(comp_id)
 
             course_id = matched_course.get("id") if matched_course else None

@@ -58,9 +58,10 @@ class CourseRepository:
         meta = cls._IGOT_COURSE_METADATA_CACHE.get(normalized_id) or {}
         ext_id = course.get("external_id") or meta.get("external_id")
         ext_url = course.get("external_url") or meta.get("external_url")
-        provider = course.get("provider") or meta.get("provider") or (
-            "iGOT Karmayogi Bharat / NSSTA" if ext_url else None
-        )
+        # Provider comes from the DB row or cache only — never fabricated from a legacy string.
+        # If neither the DB nor the cache supplies a provider, leave it None.
+        provider = course.get("provider") or meta.get("provider") or None
+        # integration_mode is derived solely from external_url presence.
         integration_mode = meta.get("integration_mode") or (
             "REAL / SUNBIRD" if ext_url else "FALLBACK / LOCAL"
         )
@@ -198,6 +199,7 @@ class CourseRepository:
             "is_active": course_data.get("is_active", True),
             "external_id": course_data.get("external_id"),
             "external_url": course_data.get("external_url"),
+            # Provider must come from actual upstream metadata; never fabricated.
             "provider": course_data.get("provider"),
         }
 
@@ -205,7 +207,8 @@ class CourseRepository:
         cls._IGOT_COURSE_METADATA_CACHE[cid] = {
             "external_id": course_data.get("external_id"),
             "external_url": course_data.get("external_url"),
-            "provider": course_data.get("provider", "iGOT Karmayogi Bharat / NSSTA"),
+            # Preserve whatever provider was normalised from Sunbird; None if not supplied.
+            "provider": course_data.get("provider"),
             "integration_mode": course_data.get("integration_mode", "REAL / SUNBIRD"),
         }
 
@@ -318,6 +321,18 @@ class CourseRepository:
                     step_status = "in_progress" if (has_assessment and idx == 0) else "upcoming"
                     action_text = "Start Course"
 
+                # Derive provider and integration_mode from the actual course record.
+                # get_course_detail() already resolves these correctly:
+                #   - external_url present  → "REAL / SUNBIRD"
+                #   - external_url absent   → "FALLBACK / LOCAL"
+                # Never hardcode here so that local and live iGOT courses render honestly.
+                course_provider = (
+                    course.get("provider") if course else None
+                ) or "VYREN Curriculum"
+                course_integration_mode = (
+                    course.get("integration_mode") if course else "FALLBACK / LOCAL"
+                )
+
                 steps.append({
                     "id": f"step-course-{idx + 1}",
                     "title": course_title,
@@ -332,8 +347,8 @@ class CourseRepository:
                     "module_id": None,
                     "competency_id": r.get("competency_id"),
                     "competency_name": comp_name,
-                    "provider": "iGOT Karmayogi Bharat / NSSTA",
-                    "integration_mode": "REAL / SUNBIRD",
+                    "provider": course_provider,
+                    "integration_mode": course_integration_mode,
                 })
         else:
             if not has_assessment:
