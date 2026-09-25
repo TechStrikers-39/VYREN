@@ -14,6 +14,7 @@ Verifies:
 import os
 import sys
 import unittest
+import unittest.mock
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -245,12 +246,12 @@ class TestCourseRepositoryDbDurability(unittest.TestCase):
         mock_get_supabase.return_value = mock_supabase
 
         db_course = {
-            "id": "b0100000-0000-0000-0000-000000000001",
-            "title": "Data Pipeline Design: Enterprise Patterns",
+            "id": "1ac6bcb1-4d72-574a-8437-ca601beed9d8",
+            "title": "Data Foundations for Governance",
             "is_active": True,
-            "external_id": "do_113812384910298112115",
-            "external_url": "https://portal.igotkarmayogi.gov.in/public/toc/do_113812384910298112115/overview",
-            "provider": "iGOT Karmayogi Bharat / NSSTA",
+            "external_id": "do_11452980177757798411",
+            "external_url": "https://portal.igotkarmayogi.gov.in/public/toc/do_11452980177757798411/overview",
+            "provider": "Wadhwani Foundation / iGOT Karmayogi Bharat",
         }
         mock_supabase.table().select().eq().eq().single().execute.return_value.data = db_course
         mock_supabase.table().select().eq().order().execute.return_value.data = [
@@ -260,14 +261,14 @@ class TestCourseRepositoryDbDurability(unittest.TestCase):
         # In-memory cache is empty
         self.assertEqual(CourseRepository._IGOT_COURSE_METADATA_CACHE, {})
 
-        detail = CourseRepository.get_course_detail("b0100000-0000-0000-0000-000000000001")
+        detail = CourseRepository.get_course_detail("1ac6bcb1-4d72-574a-8437-ca601beed9d8")
         self.assertIsNotNone(detail)
-        self.assertEqual(detail["external_id"], "do_113812384910298112115")
+        self.assertEqual(detail["external_id"], "do_11452980177757798411")
         self.assertEqual(
             detail["external_url"],
-            "https://portal.igotkarmayogi.gov.in/public/toc/do_113812384910298112115/overview",
+            "https://portal.igotkarmayogi.gov.in/public/toc/do_11452980177757798411/overview",
         )
-        self.assertEqual(detail["provider"], "iGOT Karmayogi Bharat / NSSTA")
+        self.assertEqual(detail["provider"], "Wadhwani Foundation / iGOT Karmayogi Bharat")
         self.assertEqual(detail["integration_mode"], "REAL / SUNBIRD")
 
     @unittest.mock.patch("app.repositories.course_repo.get_supabase")
