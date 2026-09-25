@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import EvidenceBreakdown from '@/components/assessment/EvidenceBreakdown';
 import { assessmentService } from '@/services/api/assessmentService';
+import { recommendationService } from '@/services/api/recommendationService';
 import { useTranslation, formatPercent } from '@/i18n';
 import { AssessmentResult } from '@/types';
 import { ROUTES } from '@/constants/routes';
@@ -64,6 +65,29 @@ export const AssessmentResultPage: React.FC = () => {
       };
     }
   }, [assessmentId, result]);
+
+  const [fallbackRec, setFallbackRec] = useState<any | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (result && !result.topRecommendation) {
+      recommendationService
+        .getRecommendations()
+        .then((recs) => {
+          if (isMounted && recs && recs.length > 0) {
+            setFallbackRec({
+              course_title: recs[0].title,
+              competency_name: recs[0].targetCompetency,
+              description: recs[0].description,
+            });
+          }
+        })
+        .catch(() => null);
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [result]);
 
   const handlePrint = () => {
     window.print();
@@ -369,41 +393,65 @@ export const AssessmentResultPage: React.FC = () => {
           </div>
 
           <div className="p-4 rounded-xl bg-surface-alt border border-border space-y-3">
-            {result.topRecommendation ? (
-              <>
-                <p className="text-xs text-text-secondary leading-relaxed">
-                  {result.topRecommendation.description ||
-                    'Your updated competency state has been recalculated in real time. The adaptive curriculum engine has adjusted your pathway to advance remaining cadre priorities.'}
-                </p>
+            {(() => {
+              const effectiveRec = result.topRecommendation || fallbackRec;
+              const hasOpenGaps = (result.resultingGaps || []).some(
+                (g: any) => (g.gap_size ?? 0) > 0 && g.priority !== 'NONE'
+              );
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                  <div>
-                    <span className="text-[10px] font-mono uppercase text-text-secondary block">
-                      Prioritized Competency &bull; {result.topRecommendation.competency_name}
-                    </span>
-                    <strong className="text-sm font-bold text-text-primary">
-                      {result.topRecommendation.course_title}
-                    </strong>
+              if (effectiveRec) {
+                return (
+                  <>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      {effectiveRec.description ||
+                        'Your updated competency state has been recalculated in real time. The adaptive curriculum engine has adjusted your pathway to advance remaining cadre priorities.'}
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase text-text-secondary block">
+                          Prioritized Competency &bull; {effectiveRec.competency_name}
+                        </span>
+                        <strong className="text-sm font-bold text-text-primary">
+                          {effectiveRec.course_title}
+                        </strong>
+                      </div>
+                      <Link
+                        to={ROUTES.LEARNER.LEARNING_PATH}
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary-navy hover:bg-primary-navy/90 text-on-primary text-xs font-bold transition shadow-xs shrink-0"
+                      >
+                        <span>Proceed to Learning Path</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </>
+                );
+              }
+
+              if (!hasOpenGaps) {
+                return (
+                  <div className="text-center py-2 space-y-1">
+                    <p className="text-xs font-bold text-emerald-700">
+                      Cadre Competency Baseline Achieved &bull; All Domains Met
+                    </p>
+                    <p className="text-xs text-text-secondary font-mono">
+                      All assessed statistical competencies meet or exceed required cadre levels. No remedial learning required.
+                    </p>
                   </div>
-                  <Link
-                    to={ROUTES.LEARNER.LEARNING_PATH}
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-primary-navy hover:bg-primary-navy/90 text-on-primary text-xs font-bold transition shadow-xs shrink-0"
-                  >
-                    <span>Proceed to Learning Path</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                );
+              }
+
+              return (
+                <div className="text-center py-2 space-y-1">
+                  <p className="text-xs font-bold text-text-primary">
+                    No learning recommendation is available yet.
+                  </p>
+                  <p className="text-xs text-text-secondary font-mono">
+                    Your competency results are available, but a matching learning module has not been found.
+                  </p>
                 </div>
-              </>
-            ) : (
-              <div className="text-center py-2 space-y-1">
-                <p className="text-xs font-bold text-text-primary">
-                  No learning recommendation is available yet.
-                </p>
-                <p className="text-xs text-text-secondary font-mono">
-                  Your competency results are available, but a matching learning module has not been found.
-                </p>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
 

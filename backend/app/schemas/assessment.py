@@ -59,3 +59,4 @@ class AssessmentResultResponse(BaseModel):
     item_log: List[Dict[str, Any]]
     resulting_gaps: List[Dict[str, Any]]
     submitted_at: datetime
+    top_recommendation: Optional[Dict[str, Any]] = None

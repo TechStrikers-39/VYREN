@@ -72,6 +72,7 @@ export const assessmentService = {
       competencyBreakdown: res.competency_breakdown || {},
       itemLog: res.item_log || [],
       resultingGaps: res.resulting_gaps || [],
+      topRecommendation: res.top_recommendation ?? null,
     };
   },
 
@@ -86,6 +87,7 @@ export const assessmentService = {
       competencyBreakdown: res.competency_breakdown || {},
       itemLog: res.item_log || [],
       resultingGaps: res.resulting_gaps || [],
+      topRecommendation: res.top_recommendation ?? null,
     };
   },
 };
